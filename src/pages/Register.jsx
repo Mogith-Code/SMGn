@@ -1,0 +1,250 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+function Register() {
+  const navigate = useNavigate()
+  
+  // Registration Form States
+  const [nic, setNic] = useState('')
+  const [household, setHousehold] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [dob, setDob] = useState('')
+  const [gender, setGender] = useState('')
+  const [mobile, setMobile] = useState('')
+  const [division, setDivision] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const handleRegisterSubmit = (e) => {
+    e.preventDefault()
+    
+    // Check if fields are empty
+    if (!nic || !household || !firstName || !lastName || !email || !dob || !gender || !mobile || !division || !password || !confirmPassword) {
+      setErrorMessage('Please fill in all fields.')
+      return
+    }
+    
+    // Password match check
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match.')
+      return
+    }
+
+    setErrorMessage('')
+    // Transition to success screen
+    navigate('/success', { 
+      state: { 
+        successUser: `${firstName} ${lastName} (NIC: ${nic})` 
+      } 
+    })
+  }
+
+  return (
+    <div className="screen-fade-active register-page">
+      <h2 className="register-title">Create your account</h2>
+      
+      <form onSubmit={handleRegisterSubmit}>
+        <div className="register-grid">
+          
+          {/* Row 1 */}
+          <div className="form-group">
+            <label htmlFor="nic">NIC Number</label>
+            <input 
+              type="text" 
+              id="nic" 
+              className="register-control" 
+              placeholder="Enter NIC Number"
+              value={nic}
+              onChange={(e) => setNic(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="household">Household Number</label>
+            <input 
+              type="text" 
+              id="household" 
+              className="register-control" 
+              placeholder="Enter Household Number"
+              value={household}
+              onChange={(e) => setHousehold(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Row 2 */}
+          <div className="form-group">
+            <label htmlFor="firstName">First Name</label>
+            <input 
+              type="text" 
+              id="firstName" 
+              className="register-control" 
+              placeholder="Enter First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="lastName">Last Name</label>
+            <input 
+              type="text" 
+              id="lastName" 
+              className="register-control" 
+              placeholder="Enter Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Row 3 - Full Width */}
+          <div className="form-group col-span-2">
+            <label htmlFor="email">email Address</label>
+            <input 
+              type="email" 
+              id="email" 
+              className="register-control" 
+              placeholder="Enter Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Row 4 */}
+          <div className="form-group">
+            <label htmlFor="dob">Date of Birth</label>
+            <input 
+              type="text" 
+              id="dob" 
+              className="register-control" 
+              placeholder="DD/MM/YYYY"
+              value={dob}
+              onChange={(e) => setDob(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="gender">Gender</label>
+            <div className="select-wrapper">
+              <select 
+                id="gender" 
+                className="register-control register-select" 
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                required
+              >
+                <option value="" disabled hidden></option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+              <span className="select-arrow">
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 1.5L6 6.5L11 1.5" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          {/* Row 5 */}
+          <div className="form-group">
+            <label htmlFor="mobile">Mobile Number</label>
+            <input 
+              type="tel" 
+              id="mobile" 
+              className="register-control" 
+              placeholder="Enter Mobile Number"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="division">Select GN Division</label>
+            <div className="select-wrapper">
+              <select 
+                id="division" 
+                className="register-control register-select" 
+                value={division}
+                onChange={(e) => setDivision(e.target.value)}
+                required
+              >
+                <option value="" disabled hidden></option>
+                <option value="Colombo 03">Colombo 03</option>
+                <option value="Colombo 07">Colombo 07</option>
+                <option value="Kandy Town">Kandy Town</option>
+                <option value="Galle Fort">Galle Fort</option>
+                <option value="Negombo South">Negombo South</option>
+              </select>
+              <span className="select-arrow">
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 1.5L6 6.5L11 1.5" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          {/* Row 6 */}
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input 
+              type="password" 
+              id="password" 
+              className="register-control" 
+              placeholder="Enter Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input 
+              type="password" 
+              id="confirmPassword" 
+              className="register-control" 
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+
+        </div>
+
+        {errorMessage && (
+          <p style={{ color: '#ef4444', fontSize: '13px', margin: '12px 0 0 0', textAlign: 'left' }}>
+            {errorMessage}
+          </p>
+        )}
+
+        <button type="submit" className="btn-register-submit">
+          Create Account
+        </button>
+      </form>
+
+      <div className="register-help">
+        Already have an account ?{' '}
+        <span 
+          className="link-orange" 
+          onClick={() => navigate('/login')}
+          style={{ cursor: 'pointer' }}
+        >
+          Login here
+        </span>
+      </div>
+    </div>
+  )
+}
+
+export default Register

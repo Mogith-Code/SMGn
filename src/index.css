@@ -1,0 +1,134 @@
+/* Core Design System for SmartGN Portal */
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Color Palette */
+  --primary-color: #1e3a8a;      /* Deep Navy Blue */
+  --primary-hover: #1e40af;
+  --accent-color: #e2a020;       /* Golden Amber */
+  --accent-hover: #d97706;
+  --bg-gradient-start: #f8fafc;
+  --bg-gradient-end: #e2e8f0;
+  
+  /* Card and Modal tokens */
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(226, 232, 240, 0.8);
+  --card-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --button-card-bg: #eef2f6;
+  --button-card-hover-bg: #e2e8f0;
+  --button-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  
+  /* Text Colors */
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  
+  box-sizing: border-box;
+}
+
+/* Dark Mode Tokens */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-gradient-start: #0f172a;
+    --bg-gradient-end: #020617;
+    --card-bg: rgba(15, 23, 42, 0.95);
+    --card-border: rgba(51, 65, 85, 0.5);
+    --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.2);
+    --button-card-bg: #1e293b;
+    --button-card-hover-bg: #334155;
+    --button-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Animated decorative background blobs to create a highly premium, modern feel */
+.bg-blobs {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: float 25s infinite ease-in-out;
+}
+
+.blob-1 {
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: var(--accent-color);
+  animation-duration: 20s;
+}
+
+.blob-2 {
+  bottom: -10%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: var(--primary-color);
+  animation-delay: -5s;
+  animation-duration: 30s;
+}
+
+.blob-3 {
+  top: 40%;
+  left: 60%;
+  width: 35vw;
+  height: 35vw;
+  background: var(--accent-color);
+  opacity: 0.08;
+  animation-delay: -10s;
+  animation-duration: 25s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(10%, 15%) scale(1.1);
+  }
+  66% {
+    transform: translate(-10%, 5%) scale(0.95);
+  }
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 24px;
+}
