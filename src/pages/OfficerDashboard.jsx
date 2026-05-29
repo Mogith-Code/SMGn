@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-function ResidentDashboard({ onOpenHelp }) {
+function OfficerDashboard({ onOpenHelp }) {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Retrieve username and division from navigation state if available (defaults to Nimal Perera)
-  const successUser = location.state?.successUser || 'Nimal Perera'
+  // Retrieve username and officerId from navigation state if available (defaults to Kamal Perera)
+  const successUser = location.state?.successUser || 'Kamal Perera'
   
   // Extract first name for the personal greeting
   const firstName = successUser.split(' ')[0]
-  const userDivision = location.state?.division || 'Colombo'
+  const officerIdVal = location.state?.officerId || '200324511540'
 
   // State to manage dismissing the alert banner
   const [showAlert, setShowAlert] = useState(true)
@@ -54,7 +54,7 @@ function ResidentDashboard({ onOpenHelp }) {
           {/* User Profile Info */}
           <div className="user-profile-info">
             <div className="user-text-details">
-              <span className="user-division">{userDivision}</span>
+              <span className="user-division">{officerIdVal}</span>
               <span className="user-name">{successUser}</span>
             </div>
             <div className="user-avatar-circle">
@@ -96,7 +96,7 @@ function ResidentDashboard({ onOpenHelp }) {
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
-              <span>Profile</span>
+              <span>Profile & Settings</span>
             </button>
 
             <button className="menu-btn">
@@ -105,15 +105,15 @@ function ResidentDashboard({ onOpenHelp }) {
                 <circle cx="9" cy="14" r="2"></circle>
                 <circle cx="15" cy="14" r="2"></circle>
               </svg>
-              <span>Family & Household</span>
+              <span>Family & Household Details</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident/certificates', { state: { successUser, division: userDivision } })}>
+            <button className="menu-btn" onClick={() => navigate('/login')}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 <circle cx="12" cy="11" r="3"></circle>
               </svg>
-              <span>Certificates</span>
+              <span>Certificates Services</span>
             </button>
 
             <button className="menu-btn" onClick={() => navigate('/login')}>
@@ -177,7 +177,20 @@ function ResidentDashboard({ onOpenHelp }) {
           {/* Stats Widgets */}
           <div className="stats-row-grid">
             
-            {/* Card 1: Pending Requests */}
+            {/* Card 1: Total Residents */}
+            <div className="stat-card">
+              <div className="stat-icon-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <circle cx="12" cy="13" r="3"></circle>
+                </svg>
+              </div>
+              <span className="stat-label">Total Residents</span>
+              <span className="stat-value">1,2400</span>
+              <span className="stat-subtext-note">+12 this month</span>
+            </div>
+
+            {/* Card 2: Pending Requests */}
             <div className="stat-card">
               <div className="stat-icon-circle">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -188,34 +201,19 @@ function ResidentDashboard({ onOpenHelp }) {
                 </svg>
               </div>
               <span className="stat-label">Pending requests</span>
-              <span className="stat-value">3</span>
+              <span className="stat-value">20</span>
             </div>
 
-            {/* Card 2: Approved Requests */}
+            {/* Card 3: Active Disaster */}
             <div className="stat-card">
               <div className="stat-icon-circle">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  <path d="M12 2L2 22h20L12 2z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
                 </svg>
               </div>
-              <span className="stat-label">Approved requests</span>
-              <span className="stat-value">5</span>
-            </div>
-
-            {/* Card 3: Upcoming Appointments */}
-            <div className="stat-card">
-              <div className="stat-icon-circle">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
-                  <polyline points="12 12 16 14 12 16"></polyline>
-                </svg>
-              </div>
-              <span className="stat-label">Upcoming Appointments</span>
-              <span className="stat-value">2</span>
+              <span className="stat-label">Active Disaster</span>
+              <span className="stat-value">20</span>
             </div>
           </div>
 
@@ -225,14 +223,14 @@ function ResidentDashboard({ onOpenHelp }) {
             
             <div className="quick-actions-button-grid">
               
-              <button className="action-button-item" onClick={() => navigate('/dashboard/resident/certificates', { state: { successUser, division: userDivision } })}>
+              <button className="action-button-item" onClick={() => navigate('/login')}>
                 <div className="action-left-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    <circle cx="12" cy="11" r="3"></circle>
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
                   </svg>
                 </div>
-                <span>Request Certificates</span>
+                <span>Approved Certificates</span>
                 <span className="action-right-arrow">➔</span>
               </button>
 
@@ -243,7 +241,7 @@ function ResidentDashboard({ onOpenHelp }) {
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                   </svg>
                 </div>
-                <span>Book Appointments</span>
+                <span>Check Appointments</span>
                 <span className="action-right-arrow">➔</span>
               </button>
 
@@ -254,7 +252,7 @@ function ResidentDashboard({ onOpenHelp }) {
                     <line x1="12" y1="4" x2="12" y2="20"></line>
                   </svg>
                 </div>
-                <span>Apply for Allowances</span>
+                <span>Review Allowances</span>
                 <span className="action-right-arrow">➔</span>
               </button>
 
@@ -265,7 +263,7 @@ function ResidentDashboard({ onOpenHelp }) {
                     <line x1="12" y1="9" x2="12" y2="13"></line>
                   </svg>
                 </div>
-                <span>Disaster Relief</span>
+                <span>Review Disaster</span>
                 <span className="action-right-arrow">➔</span>
               </button>
             </div>
@@ -296,11 +294,19 @@ function ResidentDashboard({ onOpenHelp }) {
                 </div>
               </div>
 
-              {/* Rows 2, 3, 4, 5: Empty Placeholder Boxes */}
-              <div className="announcement-row-placeholder"></div>
-              <div className="announcement-row-placeholder"></div>
-              <div className="announcement-row-placeholder"></div>
-              <div className="announcement-row-placeholder"></div>
+              {/* Rows 2, 3, 4, 5: Interactive Add Announcement Placeholders */}
+              <div className="announcement-row-placeholder clickable-placeholder">
+                <span>Add new Announcement</span>
+              </div>
+              <div className="announcement-row-placeholder clickable-placeholder">
+                <span>Add new Announcement</span>
+              </div>
+              <div className="announcement-row-placeholder clickable-placeholder">
+                <span>Add new Announcement</span>
+              </div>
+              <div className="announcement-row-placeholder clickable-placeholder">
+                <span>Add new Announcement</span>
+              </div>
             </div>
           </div>
 
@@ -321,4 +327,4 @@ function ResidentDashboard({ onOpenHelp }) {
   )
 }
 
-export default ResidentDashboard
+export default OfficerDashboard

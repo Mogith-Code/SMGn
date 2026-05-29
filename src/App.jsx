@@ -8,6 +8,13 @@ import OfficerLogin from './pages/OfficerLogin'
 import Register from './pages/Register'
 import Success from './pages/Success'
 import ResidentDashboard from './pages/ResidentDashboard'
+import OfficerDashboard from './pages/OfficerDashboard'
+import ResidentCertificates from './pages/ResidentCertificates'
+import ApplyCharacterCertificate from './pages/ApplyCharacterCertificate'
+import ApplyIncomeCertificate from './pages/ApplyIncomeCertificate'
+import ApprovedCertificates from './pages/ApprovedCertificates'
+import PendingCertificates from './pages/PendingCertificates'
+import RejectedCertificates from './pages/RejectedCertificates'
 import Chatbot from './components/Chatbot'
 
 function App() {
@@ -25,6 +32,27 @@ function App() {
 
         {/* Resident Dashboard Panel (Root-Level Layout) */}
         <Route path="/dashboard/resident" element={<ResidentDashboard onOpenHelp={handleOpenChatbot} />} />
+
+        {/* Resident Certificates Panel (Root-Level Layout) */}
+        <Route path="/dashboard/resident/certificates" element={<ResidentCertificates onOpenHelp={handleOpenChatbot} />} />
+
+        {/* Character Certificate Application Form (Root-Level Layout) */}
+        <Route path="/dashboard/resident/certificates/apply-character" element={<ApplyCharacterCertificate onOpenHelp={handleOpenChatbot} />} />
+
+        {/* Income Certificate Application Form (Root-Level Layout) */}
+        <Route path="/dashboard/resident/certificates/apply-income" element={<ApplyIncomeCertificate onOpenHelp={handleOpenChatbot} />} />
+
+        {/* Approved Certificates History Portal (Root-Level Layout) */}
+        <Route path="/dashboard/resident/certificates/approved" element={<ApprovedCertificates onOpenHelp={handleOpenChatbot} />} />
+
+        {/* Pending Certificates History Portal (Root-Level Layout) */}
+        <Route path="/dashboard/resident/certificates/pending" element={<PendingCertificates onOpenHelp={handleOpenChatbot} />} />
+
+        {/* Rejected Certificates History Portal (Root-Level Layout) */}
+        <Route path="/dashboard/resident/certificates/rejected" element={<RejectedCertificates onOpenHelp={handleOpenChatbot} />} />
+
+        {/* GN Officer Dashboard Panel (Root-Level Layout) */}
+        <Route path="/dashboard/officer" element={<OfficerDashboard onOpenHelp={handleOpenChatbot} />} />
 
         {/* Centered Auth Portal Layout for all sub-routes */}
         <Route

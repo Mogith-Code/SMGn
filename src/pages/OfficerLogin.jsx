@@ -14,9 +14,11 @@ function OfficerLogin() {
       setErrorMessage('Please fill in all fields.')
       return
     }
-    navigate('/success', { 
+    // Route directly to the high-fidelity GN Officer Dashboard
+    navigate('/dashboard/officer', { 
       state: { 
-        successUser: `GN Officer (ID: ${officerId}, Division: ${division})` 
+        successUser: 'Kamal Perera', 
+        officerId: officerId 
       } 
     })
   }
