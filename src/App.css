@@ -2398,6 +2398,1086 @@
   font-weight: 600;
 }
 
+/* ==========================================================================
+   APPOINTMENTS BOOKING AND CALENDAR PORTAL STYLES
+   ========================================================================= */
+
+.appointments-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .appointments-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* Centered Stats Grid */
+.stats-grid-appointments {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .stats-grid-appointments {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.stat-card-appointment {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.stat-card-appointment:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-color: #94a3b8;
+}
+
+.stat-card-appointment.action-card {
+  cursor: pointer;
+  border-color: #cbd5e1;
+}
+
+.stat-card-appointment.action-card:hover {
+  border-color: #d97706;
+}
+
+.stat-appointment-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+
+.stat-card-appointment:nth-child(1) .stat-appointment-icon {
+  color: #d97706;
+  background-color: #fffbeb;
+  border: 1.5px solid #fde68a;
+}
+
+.stat-card-appointment:nth-child(2) .stat-appointment-icon {
+  color: #d97706;
+  background-color: #fffbeb;
+  border: 1.5px solid #fde68a;
+}
+
+.stat-card-appointment:nth-child(3) .stat-appointment-icon {
+  color: #d97706;
+  background-color: #fffbeb;
+  border: 1.5px solid #fde68a;
+}
+
+.stat-appointment-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.stat-appointment-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+/* Premium Interactive Calendar Widget */
+.calendar-widget-card {
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+  width: 100%;
+}
+
+.calendar-widget-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 48px;
+  margin-bottom: 24px;
+  font-size: 15px;
+  font-weight: 750;
+  color: #1a2e56;
+}
+
+.calendar-nav-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 800;
+  color: #475569;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.calendar-nav-btn:hover {
+  background-color: #f1f5f9;
+  color: #1a2e56;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  width: 100%;
+  text-align: center;
+}
+
+.calendar-weekday-label {
+  font-size: 13.5px;
+  font-weight: 750;
+  color: #1a2e56;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid #cbd5e1;
+  margin-bottom: 8px;
+}
+
+.calendar-day-cell {
+  aspect-ratio: 1.4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  border: 1.5px solid transparent;
+  user-select: none;
+}
+
+.calendar-day-cell:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.calendar-day-cell.other-month {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.calendar-day-cell.other-month:hover {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+/* Active Highlight Day for Appointments (Amber indicator from screenshot) */
+.calendar-day-cell.has-booking {
+  background-color: #d97706;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.calendar-day-cell.has-booking:hover {
+  background-color: #b45309;
+}
+
+/* Highlight Selected Day Cell */
+.calendar-day-cell.selected-day {
+  border-color: #1c355e;
+  box-shadow: 0 0 0 2px rgba(28, 53, 148, 0.15);
+}
+
+/* Appointment Summary Card */
+.appointment-summary-outer {
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.appointment-summary-header {
+  font-size: 14.5px;
+  font-weight: 750;
+  color: #1a2e56;
+  margin: 0 0 20px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1.5px solid #cbd5e1;
+  padding-bottom: 8px;
+}
+
+.appointment-summary-box {
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+  .appointment-summary-box {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.appointment-summary-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background-color: #cbd5e1;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.appointment-summary-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.appointment-summary-title {
+  font-size: 15px;
+  font-weight: 750;
+  color: #1a2e56;
+  margin: 0 0 4px 0;
+}
+
+.summary-detail-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.summary-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.btn-appointment-cancel {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15);
+  outline: none;
+}
+
+.btn-appointment-cancel:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+.btn-appointment-action {
+  background-color: #102a54;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(16, 42, 84, 0.15);
+  outline: none;
+}
+
+.btn-appointment-action:hover {
+  background-color: #173b75;
+  transform: translateY(-1px);
+}
+
+.appointment-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Empty Placeholder state for summary */
+.empty-summary-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: #64748b;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 12px;
+  background-color: #f8fafc;
+}
+
+.placeholder-icon {
+  margin-bottom: 12px;
+  color: #94a3b8;
+}
+
+/* ==========================================================================
+   FAMILY & HOUSEHOLD PROFILE DETAILS AND EDITOR VIEWS STYLES
+   ========================================================================= */
+
+.household-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
+
+.household-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  background-color: #ffffff;
+}
+
+.household-table th {
+  background-color: #fdf8f0;
+  border-bottom: 1.5px solid #cbd5e1;
+  padding: 14px 20px;
+  font-size: 13.5px;
+  font-weight: 750;
+  color: #1a2e56;
+}
+
+.household-table th:not(:last-child) {
+  border-right: 1.5px solid #cbd5e1;
+}
+
+.household-table td {
+  padding: 14px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.household-table td:not(:last-child) {
+  border-right: 1.5px solid #cbd5e1;
+}
+
+.household-table tr:last-child td {
+  border-bottom: none;
+}
+
+.household-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+.edit-link-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #d97706;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.edit-link-icon:hover {
+  color: #b45309;
+  text-decoration: underline;
+}
+
+.table-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-delete-row {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.btn-delete-row:hover {
+  background-color: #fef2f2;
+  transform: scale(1.05);
+}
+
+.btn-edit-row {
+  background: none;
+  border: none;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.btn-edit-row:hover {
+  background-color: #f1f5f9;
+  color: #1a2e56;
+  transform: scale(1.05);
+}
+
+/* Household details card */
+.household-info-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.household-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.household-info-label {
+  font-size: 12px;
+  font-weight: 750;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.household-info-value {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+
+/* RESIDENT USER PROFILE AND PROFILE EDITOR VIEWS STYLES */
+
+.profile-overview-card {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1.5px solid #cbd5e1;
+  border-radius: 20px;
+  padding: 24px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.profile-overview-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profile-overview-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  color: #64748b;
+}
+
+.profile-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-overview-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.profile-overview-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+}
+
+.profile-overview-id {
+  font-size: 14px;
+  font-weight: 650;
+  color: #64748b;
+}
+
+.btn-edit-profile-action {
+  background: #ffffff;
+  border: 1.5px solid #d97706;
+  color: #d97706;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 800;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.08);
+}
+
+.btn-edit-profile-action:hover {
+  background: #fffbeb;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.15);
+}
+
+.btn-edit-profile-action:active {
+  transform: translateY(0);
+}
+
+.profile-details-split {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 24px;
+}
+
+.profile-details-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.profile-card-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1a2e56;
+  border-bottom: 1.5px solid #cbd5e1;
+  padding-bottom: 12px;
+  margin: 0 0 16px 0;
+  text-align: left;
+}
+
+.profile-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.profile-info-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-info-value {
+  font-size: 14.5px;
+  font-weight: 650;
+  color: #1e293b;
+}
+
+.nic-preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  height: calc(100% - 48px);
+  padding: 10px 0;
+}
+
+.nic-preview-box {
+  width: 100%;
+  max-width: 320px;
+  height: 175px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.nic-preview-placeholder-text {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.nic-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-photo-upload-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.profile-photo-upload-container {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 2px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  background-color: #f8fafc;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-photo-upload-container:hover {
+  border-color: #d97706;
+  background-color: #fffbeb;
+  transform: scale(1.02);
+}
+
+.profile-photo-upload-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-photo-upload-placeholder {
+  color: #94a3b8;
+}
+
+.profile-photo-upload-label {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.profile-photo-upload-label:hover {
+  color: #d97706;
+}
+
+.profile-nic-dropzone-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.nic-dropzone-item {
+  text-align: left;
+}
+
+.nic-upload-dashed-card {
+  height: 170px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background-color: #f8fafc;
+  position: relative;
+  padding: 16px;
+  transition: all 0.25s ease;
+}
+
+.nic-upload-dashed-card:hover {
+  border-color: #d97706;
+  background-color: #fffbeb;
+}
+
+.nic-upload-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.nic-upload-placeholder-icon {
+  color: #94a3b8;
+  width: 36px;
+  height: 36px;
+}
+
+.nic-upload-select-btn {
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #475569;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.nic-upload-select-btn:hover {
+  border-color: #d97706;
+  color: #d97706;
+  background-color: #fffbeb;
+}
+
+@media (max-width: 900px) {
+  .profile-details-split {
+    grid-template-columns: 1fr;
+  }
+  .nic-preview-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+}
+
+
+/* RESIDENT ALLOWANCE PROGRAMS VIEWS STYLES */
+
+.allowance-programs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.allowance-program-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  background-color: #ffffff;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+}
+
+.allowance-program-item:hover {
+  border-color: #d97706;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.08);
+}
+
+.allowance-program-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1e293b;
+  text-align: left;
+}
+
+.btn-allowance-apply {
+  background: none;
+  border: none;
+  color: #d97706;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease;
+  padding: 4px 8px;
+}
+
+.btn-allowance-apply:hover {
+  color: #b45309;
+}
+
+.allowance-requests-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.allowance-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.01);
+}
+
+.allowance-status-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  text-align: left;
+}
+
+.allowance-badge-bullet {
+  color: #d97706;
+  font-size: 14px;
+}
+
+.allowance-status-program {
+  font-size: 14.5px;
+  font-weight: 850;
+  color: #1e293b;
+  min-width: 190px;
+}
+
+.allowance-status-purpose {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: #64748b;
+}
+
+/* Modal form popup overlay */
+.modal-backdrop-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-form-card {
+  background-color: #ffffff;
+  border-radius: 24px;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 680px;
+  padding: 36px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1.5px solid #e2e8f0;
+  padding-bottom: 16px;
+}
+
+.modal-form-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: #1a2e56;
+  margin: 0;
+}
+
+.modal-close-btn-x {
+  background: #f1f5f9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn-x:hover {
+  background-color: #ef4444;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+.animate-zoom-in {
+  animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+/* GN OFFICER APPOINTMENTS MANAGEMENT VIEW STYLES */
+
+.officer-appointment-card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid #cbd5e1;
+  border-left: 4.5px solid #d97706;
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.officer-appointment-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  border-left-color: #b45309;
+  box-shadow: 0 8px 20px rgba(217, 119, 6, 0.06);
+}
+
+.btn-appt-confirm {
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(26, 46, 86, 0.15);
+}
+
+.btn-appt-confirm:hover {
+  background-color: #111e3b !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(26, 46, 86, 0.25);
+}
+
+.btn-appt-confirm:active {
+  transform: translateY(0);
+}
+
+.btn-appt-decline {
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.05);
+}
+
+.btn-appt-decline:hover {
+  background-color: #fef2f2 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15);
+}
+
+.btn-appt-decline:active {
+  transform: translateY(0);
+}
+
+.view-queue-link-btn:hover {
+  color: #b45309 !important;
+}
+
+
+/* GN OFFICER ANNOUNCEMENTS PORTAL STYLES */
+
+.dashboard-announcements-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-announcements-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+}
+
+
+/* GN OFFICER PROFILE STYLES */
+
+.officer-id-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #cbd5e1;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.officer-id-slot:hover {
+  border-color: #d97706;
+  background-color: #fcf9f2;
+}
+
+
+
+
+
+
 
 
 

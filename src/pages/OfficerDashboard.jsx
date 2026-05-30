@@ -105,7 +105,7 @@ function OfficerDashboard({ onOpenHelp }) {
               <span>Dashboard</span>
             </button>
 
-            <button className="menu-btn">
+            <button className="menu-btn" onClick={() => navigate('/dashboard/officer/profile', { state: { successUser, officerId: officerIdVal } })}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
@@ -130,7 +130,7 @@ function OfficerDashboard({ onOpenHelp }) {
               <span>Certificates Services</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/login')}>
+            <button className="menu-btn" onClick={() => navigate('/dashboard/officer/appointments', { state: { successUser, officerId: officerIdVal } })}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -157,7 +157,7 @@ function OfficerDashboard({ onOpenHelp }) {
               <span>Disaster Report</span>
             </button>
 
-            <button className="menu-btn">
+            <button className="menu-btn" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -287,13 +287,13 @@ function OfficerDashboard({ onOpenHelp }) {
           <div className="dashboard-announcements-card">
             <div className="announcements-card-header">
               <h3 className="card-inner-title" style={{ margin: 0 }}>Announcements</h3>
-              <span className="view-all-link">View all</span>
+              <span className="view-all-link" style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>View all</span>
             </div>
 
             <div className="announcements-rows-list">
               
               {/* Row 1: Active item */}
-              <div className="announcement-row-item">
+              <div className="announcement-row-item" style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
                 <div className="announcement-left-group">
                   <span className="announcement-icon-bullet">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
@@ -309,16 +309,16 @@ function OfficerDashboard({ onOpenHelp }) {
               </div>
 
               {/* Rows 2, 3, 4, 5: Interactive Add Announcement Placeholders */}
-              <div className="announcement-row-placeholder clickable-placeholder">
+              <div className="announcement-row-placeholder clickable-placeholder" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
                 <span>Add new Announcement</span>
               </div>
-              <div className="announcement-row-placeholder clickable-placeholder">
+              <div className="announcement-row-placeholder clickable-placeholder" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
                 <span>Add new Announcement</span>
               </div>
-              <div className="announcement-row-placeholder clickable-placeholder">
+              <div className="announcement-row-placeholder clickable-placeholder" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
                 <span>Add new Announcement</span>
               </div>
-              <div className="announcement-row-placeholder clickable-placeholder">
+              <div className="announcement-row-placeholder clickable-placeholder" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
                 <span>Add new Announcement</span>
               </div>
             </div>

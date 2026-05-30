@@ -17,7 +17,17 @@ import ApprovedCertificates from './pages/ApprovedCertificates'
 import PendingCertificates from './pages/PendingCertificates'
 import RejectedCertificates from './pages/RejectedCertificates'
 import ResidentDisasterReport from './pages/ResidentDisasterReport'
+import ResidentAppointments from './pages/ResidentAppointments'
+import ResidentHousehold from './pages/ResidentHousehold'
+import ResidentProfile from './pages/ResidentProfile'
+import ResidentAllowances from './pages/ResidentAllowances'
+import OfficerAppointments from './pages/OfficerAppointments'
+import OfficerAnnouncements from './pages/OfficerAnnouncements'
+import OfficerProfile from './pages/OfficerProfile'
 import Chatbot from './components/Chatbot'
+
+
+
 
 function App() {
   // Global chatbot toggle state
@@ -56,11 +66,32 @@ function App() {
         {/* Resident Disaster Damage & Relief Form (Root-Level Layout) */}
         <Route path="/dashboard/resident/disaster" element={<ResidentDisasterReport onOpenHelp={handleOpenChatbot} />} />
 
+        {/* Resident Appointment Booking and Calendar Portal */}
+        <Route path="/dashboard/resident/appointments" element={<ResidentAppointments onOpenHelp={handleOpenChatbot} />} />
+
+        {/* Resident Family & Household Management Portal */}
+        <Route path="/dashboard/resident/household" element={<ResidentHousehold onOpenHelp={handleOpenChatbot} />} />
+
+        {/* Resident Profile Management Portal */}
+        <Route path="/dashboard/resident/profile" element={<ResidentProfile onOpenHelp={handleOpenChatbot} />} />
+
+        {/* Resident Allowance Programs Portal */}
+        <Route path="/dashboard/resident/allowances" element={<ResidentAllowances onOpenHelp={handleOpenChatbot} />} />
+
         {/* GN Officer Dashboard Panel (Root-Level Layout) */}
         <Route path="/dashboard/officer" element={<OfficerDashboard onOpenHelp={handleOpenChatbot} />} />
 
+        {/* GN Officer Appointment Portal */}
+        <Route path="/dashboard/officer/appointments" element={<OfficerAppointments onOpenHelp={handleOpenChatbot} />} />
+
         {/* GN Officer Disaster Reports Portal (Root-Level Layout) */}
         <Route path="/dashboard/officer/disasters" element={<OfficerDisasterReports onOpenHelp={handleOpenChatbot} />} />
+
+        {/* GN Officer Announcements Portal */}
+        <Route path="/dashboard/officer/announcements" element={<OfficerAnnouncements onOpenHelp={handleOpenChatbot} />} />
+
+        {/* GN Officer Profile Portal */}
+        <Route path="/dashboard/officer/profile" element={<OfficerProfile onOpenHelp={handleOpenChatbot} />} />
 
         {/* Centered Auth Portal Layout for all sub-routes */}
         <Route
