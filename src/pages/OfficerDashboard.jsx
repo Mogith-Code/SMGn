@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 function OfficerDashboard({ onOpenHelp }) {
@@ -14,6 +14,20 @@ function OfficerDashboard({ onOpenHelp }) {
 
   // State to manage dismissing the alert banner
   const [showAlert, setShowAlert] = useState(true)
+
+  // State for dynamic active disasters count
+  const [activeDisastersCount, setActiveDisastersCount] = useState(2)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('smartgn_disaster_reports')
+    if (saved) {
+      const allDisasters = JSON.parse(saved)
+      const activeCount = allDisasters.filter(item => item.status !== 'Resolved').length
+      setActiveDisastersCount(activeCount)
+    } else {
+      setActiveDisastersCount(2)
+    }
+  }, [])
 
   return (
     <div className="dashboard-container">
@@ -134,7 +148,7 @@ function OfficerDashboard({ onOpenHelp }) {
               <span>Allowance Programs</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/login')}>
+            <button className="menu-btn" onClick={() => navigate('/dashboard/officer/disasters', { state: { successUser, officerId: officerIdVal } })}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                 <line x1="12" y1="9" x2="12" y2="13"></line>
@@ -205,7 +219,7 @@ function OfficerDashboard({ onOpenHelp }) {
             </div>
 
             {/* Card 3: Active Disaster */}
-            <div className="stat-card">
+            <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard/officer/disasters', { state: { successUser, officerId: officerIdVal } })}>
               <div className="stat-icon-circle">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2L2 22h20L12 2z"></path>
@@ -213,7 +227,7 @@ function OfficerDashboard({ onOpenHelp }) {
                 </svg>
               </div>
               <span className="stat-label">Active Disaster</span>
-              <span className="stat-value">20</span>
+              <span className="stat-value">{activeDisastersCount}</span>
             </div>
           </div>
 
@@ -256,7 +270,7 @@ function OfficerDashboard({ onOpenHelp }) {
                 <span className="action-right-arrow">➔</span>
               </button>
 
-              <button className="action-button-item" onClick={() => navigate('/login')}>
+              <button className="action-button-item" onClick={() => navigate('/dashboard/officer/disasters', { state: { successUser, officerId: officerIdVal } })}>
                 <div className="action-left-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
                     <path d="M12 2L2 22h20L12 2z"></path>

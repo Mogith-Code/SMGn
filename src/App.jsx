@@ -9,12 +9,14 @@ import Register from './pages/Register'
 import Success from './pages/Success'
 import ResidentDashboard from './pages/ResidentDashboard'
 import OfficerDashboard from './pages/OfficerDashboard'
+import OfficerDisasterReports from './pages/OfficerDisasterReports'
 import ResidentCertificates from './pages/ResidentCertificates'
 import ApplyCharacterCertificate from './pages/ApplyCharacterCertificate'
 import ApplyIncomeCertificate from './pages/ApplyIncomeCertificate'
 import ApprovedCertificates from './pages/ApprovedCertificates'
 import PendingCertificates from './pages/PendingCertificates'
 import RejectedCertificates from './pages/RejectedCertificates'
+import ResidentDisasterReport from './pages/ResidentDisasterReport'
 import Chatbot from './components/Chatbot'
 
 function App() {
@@ -51,8 +53,14 @@ function App() {
         {/* Rejected Certificates History Portal (Root-Level Layout) */}
         <Route path="/dashboard/resident/certificates/rejected" element={<RejectedCertificates onOpenHelp={handleOpenChatbot} />} />
 
+        {/* Resident Disaster Damage & Relief Form (Root-Level Layout) */}
+        <Route path="/dashboard/resident/disaster" element={<ResidentDisasterReport onOpenHelp={handleOpenChatbot} />} />
+
         {/* GN Officer Dashboard Panel (Root-Level Layout) */}
         <Route path="/dashboard/officer" element={<OfficerDashboard onOpenHelp={handleOpenChatbot} />} />
+
+        {/* GN Officer Disaster Reports Portal (Root-Level Layout) */}
+        <Route path="/dashboard/officer/disasters" element={<OfficerDisasterReports onOpenHelp={handleOpenChatbot} />} />
 
         {/* Centered Auth Portal Layout for all sub-routes */}
         <Route

@@ -1,0 +1,473 @@
+import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+
+function OfficerDisasterReports({ onOpenHelp }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // Retrieve username and officerId from navigation state if available (defaults to Nimal Perera)
+  const successUser = location.state?.successUser || 'Nimal Perera'
+  const officerIdVal = location.state?.officerId || '200324511540'
+  const firstName = successUser.split(' ')[0]
+
+  // State to manage list of disasters
+  const [disasters, setDisasters] = useState([])
+  const [selectedDisaster, setSelectedDisaster] = useState(null)
+  
+  // State for taking action modal
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalSeverity, setModalSeverity] = useState('high severity')
+  const [modalStatus, setModalStatus] = useState('Pending')
+  const [modalRemarks, setModalRemarks] = useState('')
+
+  // Load disasters from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('smartgn_disaster_reports')
+    if (saved) {
+      setDisasters(JSON.parse(saved))
+    } else {
+      const initialDisasters = [
+        {
+          id: 1,
+          type: 'Flood',
+          severity: 'high severity',
+          location: 'Main Street Area',
+          reporter: 'Nimal Perera',
+          date: '2026-04-02',
+          description: 'Heavy rainfall has caused water levels to rise up to 3 feet in the residential zone, flooding ground floors.',
+          contact: '0771234567',
+          aidRequested: 'Emergency evacuation and food packs',
+          status: 'Pending',
+          remarks: ''
+        },
+        {
+          id: 2,
+          type: 'Landslide',
+          severity: 'medium severity',
+          location: 'Hill View',
+          reporter: 'Kamala Silva',
+          date: '2026-04-01',
+          description: 'Minor earth slip near the hill road. Blocked access to two houses. Risk of further slides if rain continues.',
+          contact: '0719876543',
+          aidRequested: 'Clearing debris and temporary sandbags',
+          status: 'Pending',
+          remarks: ''
+        }
+      ]
+      localStorage.setItem('smartgn_disaster_reports', JSON.stringify(initialDisasters))
+      setDisasters(initialDisasters)
+    }
+  }, [])
+
+  // Handle open modal
+  const handleOpenActionModal = (disaster) => {
+    setSelectedDisaster(disaster)
+    setModalSeverity(disaster.severity)
+    setModalStatus(disaster.status || 'Pending')
+    setModalRemarks(disaster.remarks || '')
+    setIsModalOpen(true)
+  }
+
+  // Handle submit action in modal
+  const handleSaveAction = (e) => {
+    e.preventDefault()
+    if (!selectedDisaster) return
+
+    const updatedDisasters = disasters.map(item => {
+      if (item.id === selectedDisaster.id) {
+        return {
+          ...item,
+          severity: modalSeverity,
+          status: modalStatus,
+          remarks: modalRemarks
+        }
+      }
+      return item
+    })
+
+    localStorage.setItem('smartgn_disaster_reports', JSON.stringify(updatedDisasters))
+    setDisasters(updatedDisasters)
+    setIsModalOpen(false)
+    setSelectedDisaster(null)
+    alert('Disaster status updated successfully.')
+  }
+
+  return (
+    <div className="dashboard-container">
+      
+      {/* 1. Header */}
+      <header className="dashboard-header">
+        <div className="landing-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+          <span className="logo-smart">Smart</span>
+          <span className="logo-gn">GN</span>
+          <p className="logo-subtext">Digital Grama Niladhari Service Management System</p>
+        </div>
+
+        <div className="header-right">
+          {/* Language Selector */}
+          <div className="landing-lang-selector">
+            <div className="lang-wrapper">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lang-globe-icon">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              <span>English</span>
+              <svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" strokeWidth="2" className="lang-chevron">
+                <path d="M1 1.5L6 6.5L11 1.5"></path>
+              </svg>
+            </div>
+          </div>
+
+          {/* Notifications */}
+          <div className="notification-bell">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span className="bell-badge">2</span>
+          </div>
+
+          {/* User Profile Info */}
+          <div className="user-profile-info">
+            <div className="user-text-details">
+              <span className="user-division">{officerIdVal}</span>
+              <span className="user-name">{successUser}</span>
+            </div>
+            <div className="user-avatar-circle">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="avatar-svg">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* 2. Main Layout */}
+      <div className="dashboard-main-layout">
+        
+        {/* Sidebar Nav */}
+        <aside className="dashboard-sidebar">
+          <nav className="sidebar-menu">
+            <button className="menu-btn" onClick={() => navigate('/')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              <span>Home</span>
+            </button>
+
+            <button className="menu-btn" onClick={() => navigate('/dashboard/officer', { state: { successUser, officerId: officerIdVal } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+                <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+                <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+                <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+                <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+              </svg>
+              <span>Dashboard</span>
+            </button>
+
+            <button className="menu-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Profile & Settings</span>
+            </button>
+
+            <button className="menu-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <circle cx="9" cy="14" r="2"></circle>
+                <circle cx="15" cy="14" r="2"></circle>
+              </svg>
+              <span>Family & Household Details</span>
+            </button>
+
+            <button className="menu-btn" onClick={() => navigate('/login')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <circle cx="12" cy="11" r="3"></circle>
+              </svg>
+              <span>Certificates Services</span>
+            </button>
+
+            <button className="menu-btn" onClick={() => navigate('/login')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span>Appointments</span>
+            </button>
+
+            <button className="menu-btn" onClick={() => navigate('/login')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+                <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                <line x1="12" y1="4" x2="12" y2="20"></line>
+              </svg>
+              <span>Allowance Programs</span>
+            </button>
+
+            <button className="menu-btn active">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span>Disaster Report</span>
+            </button>
+
+            <button className="menu-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+              <span>Announcements</span>
+            </button>
+          </nav>
+        </aside>
+
+        {/* Main Panel Content */}
+        <main className="dashboard-content">
+          
+          <h2 className="content-greeting" style={{ marginBottom: '24px' }}>Disaster Management</h2>
+
+          {/* Disasters List Container */}
+          <div className="disasters-list-container">
+            {disasters.length === 0 ? (
+              <div className="form-alert-note" style={{ textAlign: 'center' }}>
+                <span>No disaster reports filed in your division currently.</span>
+              </div>
+            ) : (
+              disasters.map((disaster) => {
+                const cardClass = disaster.severity.includes('high') 
+                  ? 'high' 
+                  : disaster.severity.includes('medium') 
+                    ? 'medium' 
+                    : 'low'
+
+                return (
+                  <div key={disaster.id} className={`disaster-card ${cardClass}`}>
+                    
+                    <div className="disaster-card-header">
+                      <div className="disaster-card-title-group">
+                        <div className={`disaster-icon-box ${cardClass}`}>
+                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                          </svg>
+                        </div>
+                        <h3 className="disaster-title">{disaster.type}</h3>
+                      </div>
+                      
+                      <span className={`severity-badge ${cardClass}`}>
+                        {disaster.severity}
+                      </span>
+                    </div>
+
+                    <div className="disaster-meta-grid">
+                      <div className="disaster-meta-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="meta-icon">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                          <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <span>{disaster.location}</span>
+                      </div>
+
+                      <div className="disaster-meta-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="meta-icon">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span>Reporter: {disaster.reporter}</span>
+                      </div>
+
+                      <div className="disaster-meta-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="meta-icon">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span>Date: {disaster.date}</span>
+                      </div>
+
+                      <div className="disaster-meta-item">
+                        <span className={`badge-status ${disaster.status === 'Resolved' ? 'approved' : disaster.status === 'Pending' ? 'pending' : 'approved'}`} style={{ padding: '2px 10px', fontSize: '11px' }}>
+                          Status: {disaster.status || 'Pending'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button 
+                      className="action-btn-blue"
+                      onClick={() => handleOpenActionModal(disaster)}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      View Details & Take Action
+                    </button>
+
+                  </div>
+                )
+              })
+            )}
+          </div>
+
+          {/* Floating Help Trigger */}
+          <button className="floating-dashboard-help" aria-label="Help Trigger" onClick={onOpenHelp}>
+            ?
+          </button>
+        </main>
+      </div>
+
+      {/* 3. Take Action Modal */}
+      {isModalOpen && selectedDisaster && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            
+            <div className="modal-header">
+              <h3 className="modal-title">Disaster Damage Report Details</h3>
+              <button className="modal-close" onClick={() => setIsModalOpen(false)} aria-label="Close Modal">×</button>
+            </div>
+
+            <form onSubmit={handleSaveAction}>
+              <div className="modal-body">
+                
+                {/* 1. Report Details */}
+                <div className="modal-detail-row">
+                  <div className="modal-detail-item">
+                    <span className="detail-label">Disaster Type</span>
+                    <span className="detail-value">{selectedDisaster.type}</span>
+                  </div>
+                  <div className="modal-detail-item">
+                    <span className="detail-label">Report Date</span>
+                    <span className="detail-value">{selectedDisaster.date}</span>
+                  </div>
+                </div>
+
+                <div className="modal-detail-row">
+                  <div className="modal-detail-item">
+                    <span className="detail-label">Location / Area</span>
+                    <span className="detail-value">{selectedDisaster.location}</span>
+                  </div>
+                  <div className="modal-detail-item">
+                    <span className="detail-label">Reporter Name</span>
+                    <span className="detail-value">{selectedDisaster.reporter}</span>
+                  </div>
+                </div>
+
+                <div className="modal-detail-row">
+                  <div className="modal-detail-item">
+                    <span className="detail-label">Contact Number</span>
+                    <span className="detail-value">{selectedDisaster.contact}</span>
+                  </div>
+                  <div className="modal-detail-item">
+                    <span className="detail-label">Initial Severity</span>
+                    <span className="detail-value" style={{ textTransform: 'capitalize' }}>{selectedDisaster.severity}</span>
+                  </div>
+                </div>
+
+                <div className="modal-detail-item full-width">
+                  <span className="detail-label">Damage Description</span>
+                  <span className="detail-value" style={{ fontWeight: 'normal', backgroundColor: '#f1f5f9', padding: '12px', borderRadius: '8px' }}>
+                    {selectedDisaster.description}
+                  </span>
+                </div>
+
+                <div className="modal-detail-item full-width">
+                  <span className="detail-label">Relief Assistance Requested</span>
+                  <span className="detail-value" style={{ fontWeight: 'normal', backgroundColor: '#fef3c7', padding: '12px', borderRadius: '8px', color: '#78350f', border: '1px solid #fde68a' }}>
+                    {selectedDisaster.aidRequested || 'No specific relief packs requested. Assessment needed.'}
+                  </span>
+                </div>
+
+                {/* 2. Admin Action Form */}
+                <h4 className="modal-section-title">GN Officer Action Panel</h4>
+
+                <div className="modal-detail-row">
+                  <div className="form-group">
+                    <label htmlFor="modalSeveritySelect">Update Severity Level</label>
+                    <div className="select-wrapper">
+                      <select 
+                        id="modalSeveritySelect"
+                        className="register-control register-select"
+                        value={modalSeverity}
+                        onChange={(e) => setModalSeverity(e.target.value)}
+                        required
+                      >
+                        <option value="low severity">Low Severity</option>
+                        <option value="medium severity">Medium Severity</option>
+                        <option value="high severity">High Severity</option>
+                      </select>
+                      <span className="select-arrow">▼</span>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="modalStatusSelect">Relief / Action Status</label>
+                    <div className="select-wrapper">
+                      <select 
+                        id="modalStatusSelect"
+                        className="register-control register-select"
+                        value={modalStatus}
+                        onChange={(e) => setModalStatus(e.target.value)}
+                        required
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Relief Approved">Relief Approved</option>
+                        <option value="Aid Dispatched">Aid Dispatched</option>
+                        <option value="Resolved">Resolved</option>
+                      </select>
+                      <span className="select-arrow">▼</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="modalRemarksInput">Officer Remarks & Actions Taken</label>
+                  <textarea 
+                    id="modalRemarksInput"
+                    className="register-control"
+                    rows="3"
+                    placeholder="Enter official remarks, dispatch instructions, or relief status details..."
+                    value={modalRemarks}
+                    onChange={(e) => setModalRemarks(e.target.value)}
+                    style={{ resize: 'none', height: '80px', fontFamily: 'inherit' }}
+                  ></textarea>
+                </div>
+
+              </div>
+
+              <div className="modal-header" style={{ borderTop: '1.5px solid #cbd5e1', borderBottom: 'none', justifyContent: 'flex-end', gap: '12px' }}>
+                <button type="button" className="btn-back" style={{ margin: 0 }} onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-form-submit" style={{ margin: 0, padding: '10px 24px' }}>
+                  Save Action & Update
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      )}
+
+      {/* 4. Footer */}
+      <footer className="landing-footer" style={{ padding: '16px 64px', borderTop: 'none' }}>
+        <div className="footer-copyright">
+          <p>© 2026 SmartGN. All rights reserved.</p>
+        </div>
+      </footer>
+
+    </div>
+  )
+}
+
+export default OfficerDisasterReports
