@@ -24,6 +24,7 @@ import ResidentAllowances from './pages/ResidentAllowances'
 import OfficerAppointments from './pages/OfficerAppointments'
 import OfficerAnnouncements from './pages/OfficerAnnouncements'
 import OfficerProfile from './pages/OfficerProfile'
+import OfficerHouseholdDetails from './pages/OfficerHouseholdDetails'
 import Chatbot from './components/Chatbot'
 
 
@@ -92,6 +93,9 @@ function App() {
 
         {/* GN Officer Profile Portal */}
         <Route path="/dashboard/officer/profile" element={<OfficerProfile onOpenHelp={handleOpenChatbot} />} />
+
+        {/* GN Officer Family & Household Portal */}
+        <Route path="/dashboard/officer/household" element={<OfficerHouseholdDetails onOpenHelp={handleOpenChatbot} />} />
 
         {/* Centered Auth Portal Layout for all sub-routes */}
         <Route
