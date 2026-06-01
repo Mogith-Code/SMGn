@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { translations, useLanguage } from '../utils/translate'
+import LanguageSelector from '../components/LanguageSelector'
 
 function OfficerAllowances({ onOpenHelp }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const { lang } = useLanguage()
+  const t = translations[lang]
 
   // Session user defaults
   const successUser = location.state?.successUser || 'Kamal Perera'
@@ -21,6 +25,10 @@ function OfficerAllowances({ onOpenHelp }) {
   const [transferringId, setTransferringId] = useState(null)
   const [transferStep, setTransferStep] = useState(0) // 0: Idle, 1: Connecting, 2: clearing, 3: Completed
   const [transferAmount, setTransferAmount] = useState('5000')
+
+  // Receipt Modal State
+  const [showReceiptId, setShowReceiptId] = useState(null)
+  const [receiptRequest, setReceiptRequest] = useState(null)
 
   useEffect(() => {
     const saved = localStorage.getItem('smartgn_allowance_requests')
@@ -192,10 +200,21 @@ function OfficerAllowances({ onOpenHelp }) {
           setRequests(updated)
           setTransferringId(null)
           setTransferStep(0)
-          alert(`Rs. ${transferAmount}.00 successfully transferred to ${item.applicantName || item.bankDetails?.accountHolderName}! Secured reference ID: ${txnRef}`)
+          
+          // Re-verify and open the secure receipt modal automatically!
+          const completedItem = updated.find(r => r.id === id)
+          setReceiptRequest(completedItem)
+          setShowReceiptId(id)
         }, 800)
       }, 1000)
     }, 800)
+  }
+
+  // View existing receipt
+  const viewReceipt = (item, e) => {
+    e.stopPropagation()
+    setReceiptRequest(item)
+    setShowReceiptId(item.id)
   }
 
   // Filter & Search logic
@@ -217,24 +236,12 @@ function OfficerAllowances({ onOpenHelp }) {
         <div className="landing-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <span className="logo-smart">Smart</span>
           <span className="logo-gn">GN</span>
-          <p className="logo-subtext">Digital Grama Niladhari Service Management System</p>
+          <p className="logo-subtext">{t.tagline}</p>
         </div>
 
         <div className="header-right">
           {/* Language Selector */}
-          <div className="landing-lang-selector">
-            <div className="lang-wrapper">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lang-globe-icon">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-              </svg>
-              <span>English</span>
-              <svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" strokeWidth="2" className="lang-chevron">
-                <path d="M1 1.5L6 6.5L11 1.5"></path>
-              </svg>
-            </div>
-          </div>
+          <LanguageSelector />
 
           {/* Notifications */}
           <div className="notification-bell">
@@ -272,7 +279,7 @@ function OfficerAllowances({ onOpenHelp }) {
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
-              <span>Home</span>
+              <span>{t.home}</span>
             </button>
 
             <button className="menu-btn" onClick={() => navigate('/dashboard/officer', { state: { successUser, officerId: officerIdVal } })}>
@@ -282,7 +289,7 @@ function OfficerAllowances({ onOpenHelp }) {
                 <rect x="14" y="12" width="7" height="9" rx="1"></rect>
                 <rect x="3" y="16" width="7" height="5" rx="1"></rect>
               </svg>
-              <span>Dashboard</span>
+              <span>{t.dashboard}</span>
             </button>
 
             <button className="menu-btn" onClick={() => navigate('/dashboard/officer/profile', { state: { successUser, officerId: officerIdVal } })}>
@@ -290,7 +297,7 @@ function OfficerAllowances({ onOpenHelp }) {
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
-              <span>Profile & Settings</span>
+              <span>{t.profile}</span>
             </button>
 
             <button className="menu-btn" onClick={() => navigate('/dashboard/officer/household', { state: { successUser, officerId: officerIdVal } })}>
@@ -299,7 +306,7 @@ function OfficerAllowances({ onOpenHelp }) {
                 <circle cx="9" cy="14" r="2"></circle>
                 <circle cx="15" cy="14" r="2"></circle>
               </svg>
-              <span>Family & Household Details</span>
+              <span>{t.family}</span>
             </button>
 
             <button className="menu-btn" onClick={() => navigate('/dashboard/officer/certificates', { state: { successUser, officerId: officerIdVal } })}>
@@ -307,7 +314,7 @@ function OfficerAllowances({ onOpenHelp }) {
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 <circle cx="12" cy="11" r="3"></circle>
               </svg>
-              <span>Certificates Services</span>
+              <span>{t.certificates}</span>
             </button>
 
             <button className="menu-btn" onClick={() => navigate('/dashboard/officer/appointments', { state: { successUser, officerId: officerIdVal } })}>
@@ -317,7 +324,7 @@ function OfficerAllowances({ onOpenHelp }) {
                 <line x1="8" y1="2" x2="8" y2="6"></line>
                 <line x1="3" y1="10" x2="21" y2="10"></line>
               </svg>
-              <span>Appointments</span>
+              <span>{t.appointments}</span>
             </button>
 
             <button className="menu-btn active">
@@ -325,7 +332,7 @@ function OfficerAllowances({ onOpenHelp }) {
                 <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
                 <line x1="12" y1="4" x2="12" y2="20"></line>
               </svg>
-              <span>Allowance Programs</span>
+              <span>{t.allowances}</span>
             </button>
 
             <button className="menu-btn" onClick={() => navigate('/dashboard/officer/disasters', { state: { successUser, officerId: officerIdVal } })}>
@@ -334,7 +341,7 @@ function OfficerAllowances({ onOpenHelp }) {
                 <line x1="12" y1="9" x2="12" y2="13"></line>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
               </svg>
-              <span>Disaster Report</span>
+              <span>{t.disaster}</span>
             </button>
 
             <button className="menu-btn" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
@@ -342,7 +349,7 @@ function OfficerAllowances({ onOpenHelp }) {
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
               </svg>
-              <span>Announcements</span>
+              <span>{t.announcements}</span>
             </button>
           </nav>
         </aside>
@@ -420,7 +427,7 @@ function OfficerAllowances({ onOpenHelp }) {
                     border: isExpanded ? '1.5px solid #fedc9b' : '1px solid #cbd5e1',
                     borderRadius: '16px',
                     overflow: 'hidden',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.02)',
                     transition: 'border-color 0.15s ease'
                   }}
                 >
@@ -503,8 +510,25 @@ function OfficerAllowances({ onOpenHelp }) {
                             <div>
                               <span style={{ color: '#64748b', fontWeight: '600' }}>Remarks:</span> {item.remarks || 'No remarks provided.'}
                             </div>
-                            <div>
-                              <span style={{ color: '#64748b', fontWeight: '600' }}>Supportive documents:</span> Utility bill uploaded.
+                            
+                            {/* NEW: Interactive Mock PDF Document Viewer Card */}
+                            <div style={{ marginTop: '16px' }}>
+                              <span style={{ display: 'block', color: '#64748b', fontWeight: '750', marginBottom: '8px', fontSize: '13px' }}>Submitted PDF Document:</span>
+                              <div 
+                                style={{ display: 'flex', alignItems: 'center', gap: '16px', background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '12px', padding: '14px 18px', cursor: 'pointer', transition: 'all 0.15s ease' }} 
+                                onClick={() => alert(`Simulating secure document viewer for SmartGN-AL-${item.id}... Loading 'Proof_of_Income_Cert.pdf' (1.4MB)... Verified CBSL Signature.`)}
+                                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#1a2e56'}
+                                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                              >
+                                <div style={{ width: '40px', height: '40px', backgroundColor: '#fee2e2', color: '#ef4444', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: '900' }}>
+                                  PDF
+                                </div>
+                                <div style={{ flex: 1, fontSize: '13px', textAlign: 'left' }}>
+                                  <span style={{ display: 'block', fontWeight: '750', color: '#1e293b' }}>Proof_of_Income_Cert.pdf</span>
+                                  <span style={{ color: '#64748b', fontSize: '11.5px' }}>1.4 MB • Utility bill & Income Statement</span>
+                                </div>
+                                <span style={{ color: '#1a2e56', fontWeight: '800', fontSize: '12px' }}>View PDF ➔</span>
+                              </div>
                             </div>
                           </div>
 
@@ -550,13 +574,17 @@ function OfficerAllowances({ onOpenHelp }) {
                           <h4 style={{ margin: '0 0 16px 0', fontSize: '14.5px', color: '#1a2e56', fontWeight: '800' }}>Payment & Transfer Console</h4>
                           
                           {item.bankDetails ? (
-                            <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '18px', marginBottom: '20px' }}>
-                              <span style={{ display: 'block', fontSize: '11px', color: '#64748b', fontWeight: '850', textTransform: 'uppercase', marginBottom: '8px' }}>Verified Bank Account details</span>
-                              <div style={{ fontSize: '13px', color: '#1e293b', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <div><span style={{ color: '#64748b' }}>Bank:</span> <strong>{item.bankDetails.bankName}</strong></div>
-                                <div><span style={{ color: '#64748b' }}>Branch:</span> <strong>{item.bankDetails.branch}</strong></div>
-                                <div><span style={{ color: '#64748b' }}>A/C Number:</span> <strong>{item.bankDetails.accountNumber}</strong></div>
-                                <div><span style={{ color: '#64748b' }}>A/C Holder:</span> <strong>{item.bankDetails.accountHolderName}</strong></div>
+                            /* HIGHLY STYLED PREMIUM BANK CARD */
+                            <div style={{ background: '#ecfdf5', border: '1.5px solid #a7f3d0', borderRadius: '16px', padding: '20px', marginBottom: '20px', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.02)' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                <span style={{ display: 'block', fontSize: '11px', color: '#047857', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Verified Payment Account</span>
+                                <span style={{ fontSize: '11px', background: '#34d399', color: '#064e3b', fontWeight: '850', padding: '2px 8px', borderRadius: '50px' }}>CBSL matched</span>
+                              </div>
+                              <div style={{ fontSize: '13.5px', color: '#1e293b', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#065f46', fontWeight: '600' }}>Bank Name:</span> <strong>{item.bankDetails.bankName}</strong></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#065f46', fontWeight: '600' }}>Branch:</span> <strong>{item.bankDetails.branch}</strong></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#065f46', fontWeight: '600' }}>A/C Number:</span> <strong style={{ fontFamily: 'monospace', fontSize: '14px' }}>{item.bankDetails.accountNumber}</strong></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #c6f6d5', paddingTop: '8px', marginTop: '2px' }}><span style={{ color: '#065f46', fontWeight: '600' }}>Account Holder:</span> <strong>{item.bankDetails.accountHolderName}</strong></div>
                               </div>
                             </div>
                           ) : (
@@ -592,13 +620,13 @@ function OfficerAllowances({ onOpenHelp }) {
                                   ) : (
                                     /* Verified state & Disburse panel */
                                     <div style={{ textAlign: 'left' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#047857', fontSize: '13px', fontWeight: '750', marginBottom: '14px' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#047857', fontSize: '13.5px', fontWeight: '800', marginBottom: '14px' }}>
                                         <span>✓ Account Registry Status: verified</span>
                                       </div>
 
                                       {/* Amount select input */}
                                       <div style={{ marginBottom: '16px' }}>
-                                        <label htmlFor={`amount-${item.id}`} style={{ display: 'block', fontSize: '12px', fontWeight: '800', color: '#475569', marginBottom: '6px' }}>Transfer Amount (LKR) :</label>
+                                        <label htmlFor={`amount-${item.id}`} style={{ display: 'block', fontSize: '12.5px', fontWeight: '800', color: '#475569', marginBottom: '6px' }}>Transfer Amount (LKR) :</label>
                                         <input
                                           type="number"
                                           id={`amount-${item.id}`}
@@ -640,16 +668,35 @@ function OfficerAllowances({ onOpenHelp }) {
                                   )}
                                 </>
                               ) : (
-                                /* Paid state logs */
+                                /* Paid state logs & view receipt trigger */
                                 <div style={{ background: '#ecfdf5', border: '1.5px solid #10b981', borderRadius: '12px', padding: '16px', color: '#065f46' }}>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: '800', fontSize: '13.5px' }}>
                                     <span>✓ Funds successfully Disbursed</span>
                                   </div>
-                                  <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                  <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '12px' }}>
                                     <div><span style={{ color: '#047857' }}>Transferred:</span> <strong>Rs. {item.paymentAmount}.00</strong></div>
                                     <div><span style={{ color: '#047857' }}>Cleared Date:</span> <strong>{item.paymentTransferredAt}</strong></div>
                                     <div><span style={{ color: '#047857' }}>Secure Ref:</span> <code>{item.paymentTransactionRef}</code></div>
                                   </div>
+                                  
+                                  {/* VIEW SECURED RECEIPT LINK */}
+                                  <button
+                                    onClick={(e) => viewReceipt(item, e)}
+                                    style={{
+                                      background: 'none',
+                                      border: 'none',
+                                      color: '#047857',
+                                      fontWeight: '800',
+                                      fontSize: '12.5px',
+                                      cursor: 'pointer',
+                                      padding: 0,
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px'
+                                    }}
+                                  >
+                                    🧾 View Payment Receipt
+                                  </button>
                                 </div>
                               )}
                             </div>
@@ -689,6 +736,134 @@ function OfficerAllowances({ onOpenHelp }) {
           <p>© 2026 SmartGN. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* 4. Payment Portal Secure Transfer Receipt Modal */}
+      {showReceiptId && receiptRequest && (
+        <div className="modal-backdrop-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)' }}>
+          <div className="modal-form-card animate-zoom-in" style={{ maxWidth: '460px', width: '90%', padding: '32px', borderRadius: '24px', border: '1.5px solid #10b981', backgroundColor: '#ffffff', color: '#1e293b', boxShadow: '0 20px 40px rgba(16, 185, 129, 0.12)' }}>
+            
+            {/* Header: CBSL Seal */}
+            <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', border: '2.5px solid #d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto', backgroundColor: '#fdf8f0', color: '#d97706', fontSize: '24px', fontWeight: '800' }}>
+                🇱🇰
+              </div>
+              <h3 style={{ margin: 0, fontSize: '16.5px', fontWeight: '850', color: '#1a2e56', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Central Bank of Sri Lanka
+              </h3>
+              <span style={{ fontSize: '10px', color: '#64748b', fontWeight: '750', display: 'block', marginTop: '3px', letterSpacing: '0.2px' }}>
+                RTGS SECURED CLEARING SYSTEM • SYSTEM RECEIPT
+              </span>
+            </div>
+
+            {/* Receipt Details Box */}
+            <div style={{ borderTop: '2px dashed #cbd5e1', borderBottom: '2px dashed #cbd5e1', padding: '16px 0', margin: '16px 0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', textAlign: 'left' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b', fontWeight: '600' }}>Transaction Status:</span>
+                <span style={{ color: '#047857', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  ● Cleared & Settled
+                </span>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b', fontWeight: '600' }}>Transaction Ref:</span>
+                <strong style={{ fontFamily: 'monospace', fontSize: '13.5px', color: '#1e293b' }}>
+                  {receiptRequest.paymentTransactionRef}
+                </strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b', fontWeight: '600' }}>Disbursed Date:</span>
+                <strong style={{ color: '#1e293b' }}>{receiptRequest.paymentTransferredAt}</strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b', fontWeight: '600' }}>Allowance Program:</span>
+                <strong style={{ color: '#1e293b' }}>{receiptRequest.program}</strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b', fontWeight: '600' }}>Applicant Name:</span>
+                <strong style={{ color: '#1e293b' }}>{receiptRequest.applicantName || receiptRequest.bankDetails?.accountHolderName}</strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #cbd5e1', paddingTop: '8px', marginTop: '2px' }}>
+                <span style={{ color: '#64748b', fontWeight: '600' }}>Destination Bank:</span>
+                <strong style={{ color: '#1e293b' }}>{receiptRequest.bankDetails?.bankName}</strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b', fontWeight: '600' }}>Branch Office:</span>
+                <strong style={{ color: '#1e293b' }}>{receiptRequest.bankDetails?.branch}</strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b', fontWeight: '600' }}>Credit Account:</span>
+                <strong style={{ color: '#1e293b' }}>{receiptRequest.bankDetails?.accountNumber}</strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #cbd5e1', paddingTop: '12px', marginTop: '4px' }}>
+                <span style={{ color: '#1a2e56', fontWeight: '800', fontSize: '14px' }}>Settled Amount:</span>
+                <strong style={{ color: '#10b981', fontSize: '17px', fontWeight: '900' }}>
+                  Rs. {receiptRequest.paymentAmount?.toLocaleString()}.00
+                </strong>
+              </div>
+            </div>
+
+            {/* Official seal mark */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', opacity: 0.85 }}>
+              <div style={{ fontSize: '10px', color: '#64748b', textAlign: 'left' }}>
+                <span style={{ display: 'block', fontWeight: '800', color: '#475569' }}>DIVISIONAL CLEARANCE GATEWAY</span>
+                 Colombo Divisional Secretariat, Sri Lanka
+              </div>
+              <div style={{ border: '2.5px solid #10b981', borderRadius: '8px', color: '#10b981', fontSize: '10px', fontWeight: '900', padding: '3px 8px', textTransform: 'uppercase', transform: 'rotate(-4deg)', letterSpacing: '1px' }}>
+                ★ SmartGN APPROVED ★
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => alert("Downloading secured CBSL digital signed payment receipt PDF...")}
+                style={{
+                  flex: 1,
+                  background: '#ffffff',
+                  color: '#1a2e56',
+                  border: '1.5px solid #1a2e56',
+                  padding: '10px',
+                  borderRadius: '50px',
+                  fontSize: '13px',
+                  fontWeight: '800',
+                  cursor: 'pointer'
+                }}
+              >
+                📥 Download PDF
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowReceiptId(null)
+                  setReceiptRequest(null)
+                }}
+                style={{
+                  flex: 1,
+                  background: '#10b981',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '10px',
+                  borderRadius: '50px',
+                  fontSize: '13px',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)'
+                }}
+              >
+                Close Receipt
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   )
 }

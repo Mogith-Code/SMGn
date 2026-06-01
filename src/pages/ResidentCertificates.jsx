@@ -1,8 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { translations, useLanguage } from '../utils/translate'
+import LanguageSelector from '../components/LanguageSelector'
 
 function ResidentCertificates({ onOpenHelp }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const { lang } = useLanguage()
+  const t = translations[lang]
 
   // Retrieve username and division/ID from navigation state if available (defaults to Nimal Perera)
   const successUser = location.state?.successUser || 'Nimal Perera'
@@ -16,24 +20,12 @@ function ResidentCertificates({ onOpenHelp }) {
         <div className="landing-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <span className="logo-smart">Smart</span>
           <span className="logo-gn">GN</span>
-          <p className="logo-subtext">Digital Grama Niladhari Service Management System</p>
+          <p className="logo-subtext">{t.tagline}</p>
         </div>
 
         <div className="header-right">
-          {/* Language Selector */}
-          <div className="landing-lang-selector">
-            <div className="lang-wrapper">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lang-globe-icon">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-              </svg>
-              <span>English</span>
-              <svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" strokeWidth="2" className="lang-chevron">
-                <path d="M1 1.5L6 6.5L11 1.5"></path>
-              </svg>
-            </div>
-          </div>
+          <LanguageSelector />
+
 
           {/* Notifications */}
           <div className="notification-bell">
