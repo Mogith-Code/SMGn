@@ -9,6 +9,13 @@ function OfficerDashboard({ onOpenHelp }) {
   const { lang } = useLanguage()
   const t = translations[lang]
 
+  // Retrieve username and officerId from navigation state if available (defaults to Kamal Perera)
+  const successUser = location.state?.successUser || 'Kamal Perera'
+  
+  // Extract first name for the personal greeting
+  const firstName = successUser.split(' ')[0]
+  const officerIdVal = location.state?.officerId || '200324511540'
+
   const localDict = {
     EN: {
       alertNic: "Please upload a high-quality image of your National Identity Card",
@@ -64,13 +71,6 @@ function OfficerDashboard({ onOpenHelp }) {
   }
 
   const d = localDict[lang] || localDict.EN
-
-  // Retrieve username and officerId from navigation state if available (defaults to Kamal Perera)
-  const successUser = location.state?.successUser || 'Kamal Perera'
-  
-  // Extract first name for the personal greeting
-  const firstName = successUser.split(' ')[0]
-  const officerIdVal = location.state?.officerId || '200324511540'
 
   // State to manage dismissing the alert banner
   const [showAlert, setShowAlert] = useState(true)
