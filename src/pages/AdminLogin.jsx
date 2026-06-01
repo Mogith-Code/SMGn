@@ -1,51 +1,29 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-function ResidentLogin() {
+function AdminLogin() {
   const navigate = useNavigate()
-  const [nic, setNic] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
-  useEffect(() => {
-    const statuses = localStorage.getItem('smartgn_residents_profiles_status')
-    if (!statuses) {
-      const defaultStatuses = {
-        '200324511540': 'Active', // Nimal Perera
-        '789456123V': 'Active',   // Kamala Silva
-        'Nimal Perera': 'Active',
-        'Kamala Silva': 'Active'
-      }
-      localStorage.setItem('smartgn_residents_profiles_status', JSON.stringify(defaultStatuses))
-    }
-  }, [])
-
   const handleLoginSubmit = (e) => {
     e.preventDefault()
-    if (!nic || !password) {
+    if (!username || !password) {
       setErrorMessage('Please fill in all fields.')
       return
     }
 
-    // Dynamic suspended account check
-    const statusData = localStorage.getItem('smartgn_residents_profiles_status')
-    if (statusData) {
-      const statuses = JSON.parse(statusData)
-      // Check both by NIC and Name (for flexibility in mock logins)
-      if (statuses[nic] === 'Suspended' || (nic === '200324511540' && statuses['Nimal Perera'] === 'Suspended')) {
-        setErrorMessage('Your account has been deactivated by the system administrator due to policy violations. Please contact support.')
-        return
-      }
+    if (username === 'admin' && password === 'admin123') {
+      // Dynamic route to System Admin Console
+      navigate('/dashboard/admin', { 
+        state: { 
+          successUser: 'System Administrator'
+        } 
+      })
+    } else {
+      setErrorMessage('Invalid administrator credentials. Please check and try again.')
     }
-
-    // Route directly to the high-fidelity Resident Dashboard
-    navigate('/dashboard/resident', { 
-      state: { 
-        successUser: 'Nimal Perera', 
-        division: 'Colombo',
-        nic: nic 
-      } 
-    })
   }
 
   return (
@@ -59,38 +37,36 @@ function ResidentLogin() {
           Back
         </button>
         <div className="form-title-group">
-          <h3>Village Resident</h3>
-          <p>Access your Grama Niladhari services</p>
+          <h3>System Admin Portal</h3>
+          <p>Configure services and profiles status</p>
         </div>
       </div>
 
       <form onSubmit={handleLoginSubmit}>
         <div className="form-grid">
           <div className="form-group">
-            <label htmlFor="nic">NIC (National Identity Card) Number</label>
+            <label htmlFor="adminUsername">Admin Username</label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="16" rx="2"></rect>
-                  <circle cx="9" cy="12" r="3"></circle>
-                  <line x1="17" y1="9" x2="17" y2="9"></line>
-                  <line x1="15" y1="15" x2="19" y2="15"></line>
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
                 </svg>
               </span>
               <input 
                 type="text" 
-                id="nic" 
+                id="adminUsername" 
                 className="form-control" 
-                placeholder="e.g., 199912345678 or 991234567V" 
-                value={nic}
-                onChange={(e) => setNic(e.target.value)}
+                placeholder="Enter admin username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="adminPassword">Password</label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -100,7 +76,7 @@ function ResidentLogin() {
               </span>
               <input 
                 type="password" 
-                id="password" 
+                id="adminPassword" 
                 className="form-control" 
                 placeholder="Enter your password"
                 value={password}
@@ -118,11 +94,11 @@ function ResidentLogin() {
         )}
 
         <button type="submit" className="btn-submit">
-          Sign In
+          Admin Sign In
         </button>
       </form>
     </div>
   )
 }
 
-export default ResidentLogin
+export default AdminLogin

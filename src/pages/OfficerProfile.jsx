@@ -217,7 +217,7 @@ function OfficerProfile({ onOpenHelp }) {
               <span>Family & Household Details</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/officer', { state: { successUser: `${profile.firstName} ${profile.lastName}`, officerId: officerIdVal } })}>
+            <button className="menu-btn" onClick={() => navigate('/dashboard/officer/certificates', { state: { successUser: `${profile.firstName} ${profile.lastName}`, officerId: officerIdVal } })}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 <circle cx="12" cy="11" r="3"></circle>
@@ -235,7 +235,7 @@ function OfficerProfile({ onOpenHelp }) {
               <span>Appointments</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/officer', { state: { successUser: `${profile.firstName} ${profile.lastName}`, officerId: officerIdVal } })}>
+            <button className="menu-btn" onClick={() => navigate('/dashboard/officer/allowances', { state: { successUser: `${profile.firstName} ${profile.lastName}`, officerId: officerIdVal } })}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
                 <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
                 <line x1="12" y1="4" x2="12" y2="20"></line>

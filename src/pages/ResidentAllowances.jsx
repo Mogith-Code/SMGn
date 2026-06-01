@@ -23,6 +23,12 @@ function ResidentAllowances({ onOpenHelp }) {
   const [remarks, setRemarks] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
+  // Secure Bank Details State
+  const [bankName, setBankName] = useState('Bank of Ceylon')
+  const [bankBranch, setBankBranch] = useState('')
+  const [bankAccount, setBankAccount] = useState('')
+  const [accountHolder, setAccountHolder] = useState(successUser)
+
   // Load requests from localStorage on mount
   useEffect(() => {
     // Attempt to load from profile for names/NIC pre-fill
@@ -31,6 +37,7 @@ function ResidentAllowances({ onOpenHelp }) {
       const parsed = JSON.parse(savedProfile)
       setApplicantName(parsed.fullName || `${parsed.firstName} ${parsed.lastName}`)
       setApplicantNic(parsed.nic || '200324511540')
+      setAccountHolder(parsed.fullName || `${parsed.firstName} ${parsed.lastName}`)
     }
 
     const saved = localStorage.getItem('smartgn_allowance_requests')
@@ -43,62 +50,141 @@ function ResidentAllowances({ onOpenHelp }) {
           id: 1,
           program: 'Disability Allowance',
           purpose: 'For certify residence',
-          status: 'Approved'
+          status: 'Approved',
+          bankDetails: {
+            bankName: 'Bank of Ceylon',
+            branch: 'Colombo 03',
+            accountNumber: '8956321475',
+            accountHolderName: 'Nimal Perera'
+          },
+          paymentStatus: 'Paid',
+          paymentAmount: 5000,
+          paymentTransferredAt: '2026-05-28 10:45 AM',
+          paymentTransactionRef: 'TXN-859203859'
         },
         {
           id: 2,
           program: 'Aswesuma',
           purpose: 'For income verification',
-          status: 'Pending'
+          status: 'Pending',
+          bankDetails: {
+            bankName: 'Commercial Bank',
+            branch: 'Maharagama',
+            accountNumber: '1023456789',
+            accountHolderName: 'Kamala Silva'
+          },
+          paymentStatus: 'Unpaid'
         },
         {
           id: 3,
           program: 'Samurdhi',
           purpose: 'For certify residence',
-          status: 'Rejected'
+          status: 'Rejected',
+          bankDetails: {
+            bankName: 'People\'s Bank',
+            branch: 'Colombo 10',
+            accountNumber: '2019485760',
+            accountHolderName: 'Nimal Perera'
+          },
+          paymentStatus: 'Unpaid'
         },
         {
           id: 4,
           program: 'Elderly Support',
           purpose: 'For income verification',
-          status: 'Pending'
+          status: 'Pending',
+          bankDetails: {
+            bankName: 'Sampath Bank',
+            branch: 'Borella',
+            accountNumber: '4019283745',
+            accountHolderName: 'Kamala Silva'
+          },
+          paymentStatus: 'Unpaid'
         },
         {
           id: 5,
           program: 'Kidney Disease Support',
           purpose: 'For certify residence',
-          status: 'Approved'
+          status: 'Approved',
+          bankDetails: {
+            bankName: 'Bank of Ceylon',
+            branch: 'Colombo 03',
+            accountNumber: '8956321475',
+            accountHolderName: 'Nimal Perera'
+          },
+          paymentStatus: 'Paid',
+          paymentAmount: 7500,
+          paymentTransferredAt: '2026-05-29 02:15 PM',
+          paymentTransactionRef: 'TXN-902847120'
         },
         // Seed extra items to balance the stats: 5 Pending, 3 Approved, 2 Rejected
         {
           id: 6,
           program: 'Aswesuma',
           purpose: 'For livelihood support',
-          status: 'Pending'
+          status: 'Pending',
+          bankDetails: {
+            bankName: 'Bank of Ceylon',
+            branch: 'Colombo 03',
+            accountNumber: '8956321475',
+            accountHolderName: 'Nimal Perera'
+          },
+          paymentStatus: 'Unpaid'
         },
         {
           id: 7,
           program: 'Samurdhi',
           purpose: 'For family relief',
-          status: 'Pending'
+          status: 'Pending',
+          bankDetails: {
+            bankName: 'Bank of Ceylon',
+            branch: 'Colombo 03',
+            accountNumber: '8956321475',
+            accountHolderName: 'Nimal Perera'
+          },
+          paymentStatus: 'Unpaid'
         },
         {
           id: 8,
           program: 'Disability Allowance',
           purpose: 'For medical support',
-          status: 'Pending'
+          status: 'Pending',
+          bankDetails: {
+            bankName: 'Bank of Ceylon',
+            branch: 'Colombo 03',
+            accountNumber: '8956321475',
+            accountHolderName: 'Nimal Perera'
+          },
+          paymentStatus: 'Unpaid'
         },
         {
           id: 9,
           program: 'Elderly Support',
           purpose: 'For pension support',
-          status: 'Approved'
+          status: 'Approved',
+          bankDetails: {
+            bankName: 'Bank of Ceylon',
+            branch: 'Colombo 03',
+            accountNumber: '8956321475',
+            accountHolderName: 'Nimal Perera'
+          },
+          paymentStatus: 'Paid',
+          paymentAmount: 5000,
+          paymentTransferredAt: '2026-05-30 09:12 AM',
+          paymentTransactionRef: 'TXN-382947102'
         },
         {
           id: 10,
           program: 'Kidney Disease Support',
           purpose: 'For medical aid',
-          status: 'Rejected'
+          status: 'Rejected',
+          bankDetails: {
+            bankName: 'Bank of Ceylon',
+            branch: 'Colombo 03',
+            accountNumber: '8956321475',
+            accountHolderName: 'Nimal Perera'
+          },
+          paymentStatus: 'Unpaid'
         }
       ]
       localStorage.setItem('smartgn_allowance_requests', JSON.stringify(defaultRequests))
@@ -120,6 +206,8 @@ function ResidentAllowances({ onOpenHelp }) {
     setErrorMessage('')
     setIncome('')
     setRemarks('')
+    setBankBranch('')
+    setBankAccount('')
     setIsModalOpen(true)
   }
 
@@ -132,6 +220,11 @@ function ResidentAllowances({ onOpenHelp }) {
       return
     }
 
+    if (!bankBranch || !bankAccount) {
+      setErrorMessage('Please enter your complete bank account details.')
+      return
+    }
+
     setErrorMessage('')
 
     const nextId = requests.length > 0 ? Math.max(...requests.map(r => r.id)) + 1 : 11
@@ -139,14 +232,26 @@ function ResidentAllowances({ onOpenHelp }) {
       id: nextId,
       program: selectedProgram,
       purpose: purpose,
-      status: 'Pending'
+      status: 'Pending',
+      bankDetails: {
+        bankName,
+        branch: bankBranch,
+        accountNumber: bankAccount,
+        accountHolderName: accountHolder
+      },
+      paymentStatus: 'Unpaid',
+      applicantName,
+      nic: applicantNic,
+      income,
+      remarks,
+      submittedDate: new Date().toISOString().split('T')[0]
     }
 
     const updated = [newRequest, ...requests]
     localStorage.setItem('smartgn_allowance_requests', JSON.stringify(updated))
     setRequests(updated)
     setIsModalOpen(false)
-    alert(`Application for ${selectedProgram} submitted successfully! Your tracking ID is SmartGN-AL-${nextId}.`)
+    alert(`Application for ${selectedProgram} submitted successfully! Your secure tracking ID is SmartGN-AL-${nextId}.`)
   }
 
   return (
@@ -381,33 +486,50 @@ function ResidentAllowances({ onOpenHelp }) {
 
             <div className="allowance-requests-status-list">
               {visibleHistory.map((item) => (
-                <div key={item.id} className="allowance-status-row">
-                  <div className="allowance-status-details">
-                    <span className="allowance-badge-bullet">★</span>
-                    <span className="allowance-status-program">{item.program}</span>
-                    <span className="allowance-status-purpose">Purpose: {item.purpose}</span>
+                <div key={item.id} className="allowance-status-row-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', marginBottom: '16px' }}>
+                  <div className="allowance-status-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: 0, padding: 0, border: 'none' }}>
+                    <div className="allowance-status-details">
+                      <span className="allowance-badge-bullet">★</span>
+                      <span className="allowance-status-program">{item.program}</span>
+                      <span className="allowance-status-purpose">Purpose: {item.purpose}</span>
+                    </div>
+                    
+                    <span className={`badge-status ${item.status === 'Approved' ? 'approved' : item.status === 'Rejected' ? 'rejected' : 'pending'}`}>
+                      {item.status === 'Approved' && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}>
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      )}
+                      {item.status === 'Rejected' && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}>
+                          <line x1="18" y1="6" x2="6" y2="18"></line>
+                          <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                      )}
+                      {item.status === 'Pending' && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}>
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 14 12"></polyline>
+                        </svg>
+                      )}
+                      {item.status}
+                    </span>
                   </div>
-                  
-                  <span className={`badge-status ${item.status === 'Approved' ? 'approved' : item.status === 'Rejected' ? 'rejected' : 'pending'}`}>
-                    {item.status === 'Approved' && (
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}>
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                    )}
-                    {item.status === 'Rejected' && (
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}>
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    )}
-                    {item.status === 'Pending' && (
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}>
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 14 12"></polyline>
-                      </svg>
-                    )}
-                    {item.status}
-                  </span>
+
+                  {item.status === 'Approved' && item.paymentStatus === 'Paid' && (
+                    <div className="secure-payment-transfer-alert animate-zoom-in" style={{ display: 'flex', alignItems: 'center', gap: '14px', background: '#ecfdf5', border: '1.5px solid #10b981', borderRadius: '12px', padding: '14px 18px', marginTop: '6px', textAlign: 'left', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.05)' }}>
+                      <div className="payment-alert-icon-circle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#10b981', color: '#ffffff', flexShrink: 0 }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                      </div>
+                      <div style={{ fontSize: '13px', color: '#065f46' }}>
+                        <strong style={{ display: 'block', fontSize: '13.5px', color: '#047857', marginBottom: '3px', fontWeight: '800' }}>Secure Allowance Funds Transferred</strong>
+                        Grama Niladhari Kamal Perera has securely transferred <strong>Rs. {item.paymentAmount || '5,000'}.00</strong> to your verified <strong>{item.bankDetails?.bankName} ({item.bankDetails?.accountNumber})</strong> account at <strong>{item.paymentTransferredAt}</strong>. Secured Transaction Ref: <code>{item.paymentTransactionRef}</code>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -495,7 +617,70 @@ function ResidentAllowances({ onOpenHelp }) {
                       />
                     </div>
 
-                    <div className="form-group col-span-2">
+                    <div className="form-group col-span-2" style={{ borderTop: '1px solid #cbd5e1', paddingTop: '16px', marginTop: '16px', textAlign: 'left' }}>
+                      <h4 style={{ margin: '0 0 8px 0', fontSize: '14.5px', color: '#1a2e56', fontWeight: '800' }}>Payment Account Details (For secured allowance money transfer)</h4>
+                    </div>
+
+                    <div className="form-group" style={{ textAlign: 'left' }}>
+                      <label htmlFor="modalBankName">Bank Name :</label>
+                      <div className="select-wrapper">
+                        <select 
+                          id="modalBankName" 
+                          className="register-control register-select"
+                          value={bankName}
+                          onChange={(e) => setBankName(e.target.value)}
+                          required
+                        >
+                          <option value="Bank of Ceylon">Bank of Ceylon</option>
+                          <option value="People's Bank">People's Bank</option>
+                          <option value="Commercial Bank">Commercial Bank</option>
+                          <option value="Sampath Bank">Sampath Bank</option>
+                          <option value="Hatton National Bank">Hatton National Bank</option>
+                        </select>
+                        <span className="select-arrow">▼</span>
+                      </div>
+                    </div>
+
+                    <div className="form-group" style={{ textAlign: 'left' }}>
+                      <label htmlFor="modalBankBranch">Branch :</label>
+                      <input 
+                        type="text" 
+                        id="modalBankBranch" 
+                        className="register-control" 
+                        placeholder="e.g. Colombo 03"
+                        value={bankBranch}
+                        onChange={(e) => setBankBranch(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ textAlign: 'left' }}>
+                      <label htmlFor="modalBankAccount">Account Number :</label>
+                      <input 
+                        type="text" 
+                        id="modalBankAccount" 
+                        className="register-control" 
+                        placeholder="e.g. 1023456789"
+                        value={bankAccount}
+                        onChange={(e) => setBankAccount(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ textAlign: 'left' }}>
+                      <label htmlFor="modalAccountHolder">Account Holder Name :</label>
+                      <input 
+                        type="text" 
+                        id="modalAccountHolder" 
+                        className="register-control" 
+                        placeholder="e.g. Nimal Perera"
+                        value={accountHolder}
+                        onChange={(e) => setAccountHolder(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group col-span-2" style={{ textAlign: 'left' }}>
                       <label>Attach Supporting Documents (Income cert/NIC copy) :</label>
                       <div className="nic-upload-dashed-card" style={{ height: '110px' }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="nic-upload-placeholder-icon">

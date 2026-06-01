@@ -25,6 +25,11 @@ import OfficerAppointments from './pages/OfficerAppointments'
 import OfficerAnnouncements from './pages/OfficerAnnouncements'
 import OfficerProfile from './pages/OfficerProfile'
 import OfficerHouseholdDetails from './pages/OfficerHouseholdDetails'
+import OfficerCertificates from './pages/OfficerCertificates'
+import OfficerCertificateDetails from './pages/OfficerCertificateDetails'
+import OfficerAllowances from './pages/OfficerAllowances'
+import AdminLogin from './pages/AdminLogin'
+import AdminDashboard from './pages/AdminDashboard'
 import Chatbot from './components/Chatbot'
 
 
@@ -97,6 +102,16 @@ function App() {
         {/* GN Officer Family & Household Portal */}
         <Route path="/dashboard/officer/household" element={<OfficerHouseholdDetails onOpenHelp={handleOpenChatbot} />} />
 
+        {/* GN Officer Certificates Services List & Details */}
+        <Route path="/dashboard/officer/certificates" element={<OfficerCertificates onOpenHelp={handleOpenChatbot} />} />
+        <Route path="/dashboard/officer/certificates/:id" element={<OfficerCertificateDetails onOpenHelp={handleOpenChatbot} />} />
+
+        {/* GN Officer Allowance Management & Secure Bank Transfer */}
+        <Route path="/dashboard/officer/allowances" element={<OfficerAllowances onOpenHelp={handleOpenChatbot} />} />
+
+        {/* System Admin Dashboard (Root-Level Full-screen Layout) */}
+        <Route path="/dashboard/admin" element={<AdminDashboard onOpenHelp={handleOpenChatbot} />} />
+
         {/* Centered Auth Portal Layout for all sub-routes */}
         <Route
           path="/*"
@@ -115,6 +130,7 @@ function App() {
                     <Route path="/login" element={<RoleSelection />} />
                     <Route path="/login/resident" element={<ResidentLogin />} />
                     <Route path="/login/officer" element={<OfficerLogin />} />
+                    <Route path="/login/admin" element={<AdminLogin />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/success" element={<Success />} />
                     {/* Catch-all redirects back to public landing page */}

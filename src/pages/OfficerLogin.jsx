@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 function OfficerLogin() {
@@ -8,12 +8,37 @@ function OfficerLogin() {
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
+  useEffect(() => {
+    const statuses = localStorage.getItem('smartgn_officers_profiles_status')
+    if (!statuses) {
+      const defaultStatuses = {
+        '200324511540': 'Active', // Kamal Perera
+        'Sunil Silva ID': 'Active', // Sunil Silva
+        'Kamal Perera': 'Active',
+        'Sunil Silva': 'Active'
+      }
+      localStorage.setItem('smartgn_officers_profiles_status', JSON.stringify(defaultStatuses))
+    }
+  }, [])
+
   const handleLoginSubmit = (e) => {
     e.preventDefault()
     if (!officerId || !division || !password) {
       setErrorMessage('Please fill in all fields.')
       return
     }
+
+    // Dynamic suspended account check
+    const statusData = localStorage.getItem('smartgn_officers_profiles_status')
+    if (statusData) {
+      const statuses = JSON.parse(statusData)
+      // Check both by OfficerID and Name (for flexibility in mock logins)
+      if (statuses[officerId] === 'Suspended' || (officerId === '200324511540' && statuses['Kamal Perera'] === 'Suspended')) {
+        setErrorMessage('Access Denied: Your officer credentials have been suspended by the Admin. Please contact the Head Office.')
+        return
+      }
+    }
+
     // Route directly to the high-fidelity GN Officer Dashboard
     navigate('/dashboard/officer', { 
       state: { 
