@@ -34,7 +34,7 @@ function About() {
           {/* IMAGE CONTAINER */}
           <div className="w-full flex justify-center">
             <img 
-              src="../../favicon.png"
+              src="/favicon.png"
               alt="SmartGN - Digital Grama Niladhari Service Management System"
               className="w-[285px] opacity-[50%] h-auto object-cover rounded-lg"
             />
