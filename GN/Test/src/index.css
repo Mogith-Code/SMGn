@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px; /* Adjust based on your navbar height */
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+
+
+
