@@ -1,6 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+@import "tailwindcss";
+
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px; /* Adjust based on your navbar height */
+}
 /* Core Design System for SmartGN Portal */
 :root {
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+   --font-sans: 'Roboto', sans-serif;
   
   /* Color Palette */
   --primary-color: #1e3a8a;      /* Deep Navy Blue */
@@ -19,8 +28,8 @@
   --button-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   
   /* Text Colors */
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
+  --text-primary: #1B365D;
+  --text-secondary: #2D3748;
   --text-muted: #64748b;
   --text-light: #94a3b8;
   
@@ -49,17 +58,10 @@
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-sans);
-  color: var(--text-primary);
-  background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow-x: hidden;
-  position: relative;
+  @apply m-0 p-0 min-h-screen flex items-center justify-center overflow-x-hidden relative border border-green-500;
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
 }
 
 /* Animated decorative background blobs to create a highly premium, modern feel */
@@ -125,10 +127,5 @@ body {
 }
 
 #root {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  min-height: 100vh;
-  padding: 24px;
+ @apply flex justify-center items-center w-full min-h-screen;
 }

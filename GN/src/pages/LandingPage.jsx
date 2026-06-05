@@ -1,6 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import logoImage from '../assets/logo.png'
+import homeIcon from '../assets/home_24dp_2D3748_FILL0_wght400_GRAD0_opsz24.svg'
+import aboutIcon from '../assets/info_24dp_2D3748_FILL0_wght400_GRAD0_opsz24.svg'
+import servicesIcon from '../assets/accessibility_24dp_2D3748_FILL0_wght400_GRAD0_opsz24.svg'
 
 function LandingPage({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -68,39 +72,29 @@ function LandingPage({ onOpenHelp }) {
   }
 
   return (
-    <div className="landing-container">
+    <div className="w-full min-h-screen bg-[#F7FAFC] text-[#2D3748] flex flex-col items-stretch border border-red-500 text-center">
       
       {/* 1. Header/Navbar */}
-      <header className="landing-navbar">
-        <div className="landing-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-          <span className="logo-smart">Smart</span>
-          <span className="logo-gn">GN</span>
-          <p className="logo-subtext">{t.tagline}</p>
+      <header className="flex justify-between items-center py-3 px-16 bg-[#EBF8FF] border border-[red] sticky top-0 z-[100] shadow-[0_5px_25px_rgba(0,0,0,0.2)]">
+        <div className="flex flex-col items-start text-left" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+          <img 
+            src={logoImage} 
+            alt="SmartGN Logo" 
+            className="w-70 h-auto border border-[red]"
+            />
         </div>
 
-        <nav className="landing-nav-links">
-          <a href="#home" className="nav-item active">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="nav-icon">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-              <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
+        <nav className="flex items-center gap-9">
+          <a href="#home" className="flex items-center gap-2 no-underline text-sm font-semibold text-slate-600 py-1.5 px-1 transition-all duration-200">
+            <img src={homeIcon} alt="Home" className="w-auto h-5" />
             {t.home}
           </a>
-          <a href="#about" className="nav-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="nav-icon">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="16" x2="12" y2="12"></line>
-              <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
+          <a href="#about" className="flex items-center gap-2 no-underline text-sm font-semibold text-slate-600 py-1.5 px-1 transition-all duration-200">
+            <img src={aboutIcon} alt="About" className="w-auto h-5" />
             {navTranslations[lang].about}
           </a>
-          <a href="#services" className="nav-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="nav-icon">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
+          <a href="#services" className="flex items-center gap-2 no-underline text-sm font-semibold text-slate-600 py-1.5 px-1 transition-all duration-200">
+            <img src={servicesIcon} alt="Services" className="w-auto h-5" />
             {navTranslations[lang].services}
           </a>
         </nav>
