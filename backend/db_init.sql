@@ -214,22 +214,22 @@ CREATE TABLE IF NOT EXISTS announcement (
 -- Seeding Initial Mock Data (matching mockup division Borella)
 -- ---------------------------------------------------------
 
-INSERT INTO gn_division (division_id, name, district, province) VALUES
+INSERT IGNORE INTO gn_division (division_id, name, district, province) VALUES
 ('DIV-BORELLA-01', 'Colombo, Borella', 'Colombo', 'Western');
 
-INSERT INTO household (household_number, address, division_id) VALUES
+INSERT IGNORE INTO household (household_number, address, division_id) VALUES
 ('H-90823', '45/2, Temple Road, Borella', 'DIV-BORELLA-01'),
 ('H-90824', '12, School Lane, Borella', 'DIV-BORELLA-01');
 
 -- Passwords hashed 'password123'
-INSERT INTO resident (r_nic, name, date_of_birth, password, gender, mobile_no, occupation, email, household_number) VALUES
+INSERT IGNORE INTO resident (r_nic, name, date_of_birth, password, gender, mobile_no, occupation, email, household_number) VALUES
 ('789456123V', 'Nimal Perera', '1990-05-15', '$2b$10$mKpQ9qw9yqJh0BJU1CKOTeMMIpLW3mnGP6g0YaemBcn6W.uHNcbIS', 'Male', '0771234567', 'Engineer', 'nimal@example.com', 'H-90823'),
 ('897654321V', 'Kamala Silva', '1985-08-20', '$2b$10$mKpQ9qw9yqJh0BJU1CKOTeMMIpLW3mnGP6g0YaemBcn6W.uHNcbIS', 'Female', '0719876543', 'Teacher', 'kamala@example.com', 'H-90824');
 
 -- Passwords hashed 'password123'
-INSERT INTO grama_niladhari (gn_id, username, password, name, email, mobile, division_id) VALUES
+INSERT IGNORE INTO grama_niladhari (gn_id, username, password, name, email, mobile, division_id) VALUES
 ('GN-BORELLA', 'kamal_gn', '$2b$10$mKpQ9qw9yqJh0BJU1CKOTeMMIpLW3mnGP6g0YaemBcn6W.uHNcbIS', 'Kamal Perera', 'kamal.gn@example.com', '0703564478', 'DIV-BORELLA-01');
 
 -- Passwords hashed 'admin123'
-INSERT INTO admin (admin_id, name, username, password, email) VALUES
+INSERT IGNORE INTO admin (admin_id, name, username, password, email) VALUES
 ('ADMIN-01', 'System Administrator', 'admin', '$2b$10$LWqQ3Eun7eJFjMsTieqoCOjqSaFryJx8mqDcNTLEZ60vX6feM7eR2', 'admin@smartgn.gov.lk');
