@@ -164,36 +164,36 @@ function ResidentAppointments({ onOpenHelp }) {
   ]
 
   return (
-    <div className="dashboard-container">
+    <div className="w-full min-h-screen bg-[#F7FAFC] text-[#2D3748] flex flex-col items-stretch border border-red-500 text-center">
       
       {/* 1. Header */}
-      <header className="dashboard-header">
+      <header className="flex justify-between items-center py-3 px-16 bg-white border-b-[1.5px] border-slate-300 sticky top-0 z-[100] shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
         <div className="landing-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <span className="logo-smart">Smart</span>
           <span className="logo-gn">GN</span>
           <p className="logo-subtext">{t.tagline}</p>
         </div>
 
-        <div className="header-right">
+        <div className="flex items-center gap-7">
           <LanguageSelector />
 
           {/* Notifications */}
-          <div className="notification-bell">
+          <div className="relative cursor-pointer text-slate-600 flex items-center justify-center transition-colors duration-200">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span className="bell-badge">2</span>
+            <span className="absolute -top-1.5 -right-1.5 bg-amber-600 text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center border-[1.5px] border-white">2</span>
           </div>
 
           {/* User Profile Info */}
-          <div className="user-profile-info">
-            <div className="user-text-details">
-              <span className="user-division">{userDivision}</span>
-              <span className="user-name">{successUser}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-end text-right leading-[1.35]">
+              <span className="text-[9.5px] font-[750] text-slate-500 uppercase tracking-[0.5px]">{userDivision}</span>
+              <span className="text-[13.5px] font-bold text-[#1a2e56]">{successUser}</span>
             </div>
-            <div className="user-avatar-circle">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="avatar-svg">
+            <div className="w-[38px] h-[38px] rounded-full bg-slate-200 flex items-center justify-center text-slate-600 border-[1.5px] border-slate-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
@@ -203,21 +203,21 @@ function ResidentAppointments({ onOpenHelp }) {
       </header>
 
       {/* 2. Main Layout */}
-      <div className="dashboard-main-layout">
+      <div className="flex gap-[20px]">
         
         {/* Sidebar Nav */}
-        <aside className="dashboard-sidebar">
-          <nav className="sidebar-menu">
-            <button className="menu-btn" onClick={() => navigate('/')}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+        <aside className="w-[280px] bg-white border-r border-[#2D37482D] py-[60px] pr-[20px]">
+          <nav className="flex flex-col gap-[5px]">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
               <span>{t.home}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <rect x="3" y="3" width="7" height="9" rx="1"></rect>
                 <rect x="14" y="3" width="7" height="5" rx="1"></rect>
                 <rect x="14" y="12" width="7" height="9" rx="1"></rect>
@@ -226,16 +226,16 @@ function ResidentAppointments({ onOpenHelp }) {
               <span>{t.dashboard}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident/profile', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/profile', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
               <span>{t.profile}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident/household', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/household', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <circle cx="9" cy="14" r="2"></circle>
                 <circle cx="15" cy="14" r="2"></circle>
@@ -243,15 +243,15 @@ function ResidentAppointments({ onOpenHelp }) {
               <span>{t.family}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident/certificates', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/certificates', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 <circle cx="12" cy="11" r="3"></circle>
               </svg>
               <span>{t.certificates}</span>
             </button>
 
-            <button className="menu-btn active">
+            <button className="bg-[#1c355e] flex gap-3.5 py-3 px-7 items-center text-white rounded-r-full cursor-pointer shadow-[0_4px_10px_rgba(28,53,94,0.15)]" onClick={() => navigate('/dashboard/resident/appointments', { state: { successUser, division: userDivision } })}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -261,16 +261,16 @@ function ResidentAppointments({ onOpenHelp }) {
               <span>{t.appointments}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident/allowances', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/allowances', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
                 <line x1="12" y1="4" x2="12" y2="20"></line>
               </svg>
               <span>{t.allowances}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident/disaster', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/disaster', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                 <line x1="12" y1="9" x2="12" y2="13"></line>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -278,8 +278,8 @@ function ResidentAppointments({ onOpenHelp }) {
               <span>{t.disaster}</span>
             </button>
 
-            <button className="menu-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/announcements', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
               </svg>
