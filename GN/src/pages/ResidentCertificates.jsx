@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function ResidentCertificates({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -8,9 +10,35 @@ function ResidentCertificates({ onOpenHelp }) {
   const { lang } = useLanguage()
   const t = translations[lang]
 
-  // Retrieve username and division/ID from navigation state if available (defaults to Nimal Perera)
-  const successUser = location.state?.successUser || 'Nimal Perera'
-  const userDivision = location.state?.division || '200324511540'
+  // Retrieve username and division/ID from navigation state or localStorage (defaults to Nimal Perera)
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Nimal Perera'
+  const userDivision = location.state?.division || localStorage.getItem('smartgn_user_division') || 'Colombo'
+
+  const [requests, setRequests] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const loadRequests = async () => {
+    try {
+      const response = await fetch('/api/certificates/resident', {
+        headers: getAuthHeaders()
+      })
+      if (!response.ok) throw new Error('Failed to load certificates.')
+      const data = await response.json()
+      setRequests(data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadRequests()
+  }, [])
+
+  const pendingCount = requests.filter(r => r.status === 'PENDING').length
+  const approvedCount = requests.filter(r => r.status === 'APPROVED').length
+  const rejectedCount = requests.filter(r => r.status === 'REJECTED').length
 
   return (
     <div className="dashboard-container">
@@ -156,7 +184,7 @@ function ResidentCertificates({ onOpenHelp }) {
                 </svg>
               </div>
               <span className="stat-label">Pending certificate requests</span>
-              <span className="stat-value">5</span>
+              <span className="stat-value">{pendingCount}</span>
             </div>
 
             {/* Card 2: Approved */}
@@ -167,7 +195,7 @@ function ResidentCertificates({ onOpenHelp }) {
                 </svg>
               </div>
               <span className="stat-label">Approved certificate requests</span>
-              <span className="stat-value">3</span>
+              <span className="stat-value">{approvedCount}</span>
             </div>
 
             {/* Card 3: Rejected */}
@@ -180,7 +208,7 @@ function ResidentCertificates({ onOpenHelp }) {
                 </svg>
               </div>
               <span className="stat-label">Rejected certificate requests</span>
-              <span className="stat-value">2</span>
+              <span className="stat-value">{rejectedCount}</span>
             </div>
           </div>
 
@@ -222,115 +250,51 @@ function ResidentCertificates({ onOpenHelp }) {
             <h3 className="card-inner-title">Requested certificates status</h3>
 
             <div className="announcements-rows-list">
-              
-              {/* Row 1: Approved */}
-              <div className="announcement-row-item">
-                <div className="announcement-left-group">
-                  <span className="announcement-icon-bullet">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                  </span>
-                  <span className="announcement-title-txt">Character certificate</span>
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>Loading requests...</div>
+              ) : requests.length === 0 ? (
+                <div className="announcement-row-placeholder" style={{ borderStyle: 'solid', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '13px', fontWeight: '600' }}>
+                  No certificate requests registered to your account yet.
                 </div>
-                <div className="announcement-right-group">
-                  <span className="announcement-date">Purpose: For certify residence</span>
-                  <span className="badge-status approved">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Approved
-                  </span>
-                </div>
-              </div>
-
-              {/* Row 2: Pending */}
-              <div className="announcement-row-item">
-                <div className="announcement-left-group">
-                  <span className="announcement-icon-bullet">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                  </span>
-                  <span className="announcement-title-txt">Income certificate</span>
-                </div>
-                <div className="announcement-right-group">
-                  <span className="announcement-date">Purpose: For income verification</span>
-                  <span className="badge-status pending">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    Pending
-                  </span>
-                </div>
-              </div>
-
-              {/* Row 3: Rejected */}
-              <div className="announcement-row-item">
-                <div className="announcement-left-group">
-                  <span className="announcement-icon-bullet">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                  </span>
-                  <span className="announcement-title-txt">Character certificate</span>
-                </div>
-                <div className="announcement-right-group">
-                  <span className="announcement-date">Purpose: For certify residence</span>
-                  <span className="badge-status rejected">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                    Rejected
-                  </span>
-                </div>
-              </div>
-
-              {/* Row 4: Pending */}
-              <div className="announcement-row-item">
-                <div className="announcement-left-group">
-                  <span className="announcement-icon-bullet">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                  </span>
-                  <span className="announcement-title-txt">Income certificate</span>
-                </div>
-                <div className="announcement-right-group">
-                  <span className="announcement-date">Purpose: For income verification</span>
-                  <span className="badge-status pending">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    Pending
-                  </span>
-                </div>
-              </div>
-
-              {/* Row 5: Approved */}
-              <div className="announcement-row-item">
-                <div className="announcement-left-group">
-                  <span className="announcement-icon-bullet">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                  </span>
-                  <span className="announcement-title-txt">Character certificate</span>
-                </div>
-                <div className="announcement-right-group">
-                  <span className="announcement-date">Purpose: For certify residence</span>
-                  <span className="badge-status approved">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Approved
-                  </span>
-                </div>
-              </div>
-
+              ) : (
+                requests.map(req => (
+                  <div key={req.request_id} className="announcement-row-item">
+                    <div className="announcement-left-group">
+                      <span className="announcement-icon-bullet">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                      </span>
+                      <span className="announcement-title-txt" style={{ textTransform: 'capitalize' }}>
+                        {req.certificate_type.toLowerCase()} Certificate
+                      </span>
+                    </div>
+                    <div className="announcement-right-group">
+                      <span className="announcement-date">Purpose: {req.purpose}</span>
+                      <span className={`badge-status ${req.status === 'APPROVED' ? 'approved' : req.status === 'REJECTED' ? 'rejected' : 'pending'}`}>
+                        {req.status === 'APPROVED' && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}>
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        )}
+                        {req.status === 'REJECTED' && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}>
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        )}
+                        {req.status === 'PENDING' && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}>
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                          </svg>
+                        )}
+                        {req.status}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

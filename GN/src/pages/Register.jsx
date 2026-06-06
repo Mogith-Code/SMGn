@@ -5,7 +5,8 @@ function Register() {
   const navigate = useNavigate()
   
   // Registration Form States
-  const [nic, setNic] = useState('')
+  const [role, setRole] = useState('RESIDENT') // 'RESIDENT' | 'OFFICER'
+  const [nic, setNic] = useState('') // NIC for resident, username/ID for officer
   const [household, setHousehold] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -21,10 +22,17 @@ function Register() {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault()
     
-    // Check if fields are empty
-    if (!nic || !household || !firstName || !lastName || !email || !dob || !gender || !mobile || !division || !password || !confirmPassword) {
-      setErrorMessage('Please fill in all fields.')
-      return
+    // Check if fields are empty based on role
+    if (role === 'RESIDENT') {
+      if (!nic || !household || !firstName || !lastName || !email || !dob || !gender || !mobile || !division || !password || !confirmPassword) {
+        setErrorMessage('Please fill in all fields.')
+        return
+      }
+    } else {
+      if (!nic || !firstName || !lastName || !email || !mobile || !division || !password || !confirmPassword) {
+        setErrorMessage('Please fill in all required fields.')
+        return
+      }
     }
     
     // Password match check
@@ -34,19 +42,30 @@ function Register() {
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const endpoint = role === 'RESIDENT' ? '/api/auth/register' : '/api/auth/register/officer'
+      const bodyPayload = role === 'RESIDENT' ? {
+        nic,
+        name: `${firstName} ${lastName}`,
+        dob,
+        password,
+        gender,
+        mobile,
+        email,
+        householdNumber: household,
+        division
+      } : {
+        username: nic,
+        name: `${firstName} ${lastName}`,
+        email,
+        mobile,
+        division,
+        password
+      }
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nic,
-          name: `${firstName} ${lastName}`,
-          dob,
-          password,
-          gender,
-          mobile,
-          email,
-          householdNumber: household
-        })
+        body: JSON.stringify(bodyPayload)
       })
 
       const data = await response.json()
@@ -59,7 +78,7 @@ function Register() {
       // Transition to success screen
       navigate('/success', { 
         state: { 
-          successUser: `${firstName} ${lastName} (NIC: ${nic})`,
+          successUser: `${firstName} ${lastName} (${role === 'RESIDENT' ? 'NIC' : 'Officer Username'}: ${nic})`,
           isRegister: true
         } 
       })
@@ -70,37 +89,103 @@ function Register() {
 
   return (
     <div className="screen-fade-active register-page">
-      <h2 className="register-title">Create your account</h2>
+      <h2 className="register-title" style={{ marginBottom: '16px' }}>Create your account</h2>
       
+      {/* Role Selection Tabs */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', justifyContent: 'center' }}>
+        <button 
+          type="button"
+          onClick={() => { setRole('RESIDENT'); setErrorMessage(''); }}
+          style={{
+            flex: 1,
+            padding: '10px',
+            borderRadius: '8px',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '700',
+            backgroundColor: role === 'RESIDENT' ? '#d97706' : '#f1f5f9',
+            color: role === 'RESIDENT' ? '#ffffff' : '#475569',
+            transition: 'all 0.2s',
+            boxShadow: role === 'RESIDENT' ? '0 4px 6px -1px rgba(217, 119, 6, 0.2)' : 'none'
+          }}
+        >
+          Resident Sign Up
+        </button>
+        <button 
+          type="button"
+          onClick={() => { setRole('OFFICER'); setErrorMessage(''); }}
+          style={{
+            flex: 1,
+            padding: '10px',
+            borderRadius: '8px',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '700',
+            backgroundColor: role === 'OFFICER' ? '#d97706' : '#f1f5f9',
+            color: role === 'OFFICER' ? '#ffffff' : '#475569',
+            transition: 'all 0.2s',
+            boxShadow: role === 'OFFICER' ? '0 4px 6px -1px rgba(217, 119, 6, 0.2)' : 'none'
+          }}
+        >
+          GN Officer Sign Up
+        </button>
+      </div>
+
       <form onSubmit={handleRegisterSubmit}>
         <div className="register-grid">
           
           {/* Row 1 */}
           <div className="form-group">
-            <label htmlFor="nic">NIC Number</label>
+            <label htmlFor="nic">{role === 'RESIDENT' ? 'NIC Number' : 'Officer Username / ID'}</label>
             <input 
               type="text" 
               id="nic" 
               className="register-control" 
-              placeholder="Enter NIC Number"
+              placeholder={role === 'RESIDENT' ? "Enter NIC Number" : "Enter Username"}
               value={nic}
               onChange={(e) => setNic(e.target.value)}
               required
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="household">Household Number</label>
-            <input 
-              type="text" 
-              id="household" 
-              className="register-control" 
-              placeholder="Enter Household Number"
-              value={household}
-              onChange={(e) => setHousehold(e.target.value)}
-              required
-            />
-          </div>
+          {role === 'RESIDENT' ? (
+            <div className="form-group">
+              <label htmlFor="household">Household Number</label>
+              <input 
+                type="text" 
+                id="household" 
+                className="register-control" 
+                placeholder="Enter Household Number"
+                value={household}
+                onChange={(e) => setHousehold(e.target.value)}
+                required
+              />
+            </div>
+          ) : (
+            <div className="form-group">
+              <label htmlFor="division">Grama Niladhari Division</label>
+              <div className="select-wrapper">
+                <select 
+                  id="division" 
+                  className="register-control register-select" 
+                  value={division}
+                  onChange={(e) => setDivision(e.target.value)}
+                  required
+                >
+                  <option value="" disabled hidden>Select division</option>
+                  <option value="Colombo 03">Colombo 03</option>
+                  <option value="Colombo 07">Colombo 07</option>
+                  <option value="Kandy Town">Kandy Town</option>
+                  <option value="Galle Fort">Galle Fort</option>
+                  <option value="Negombo South">Negombo South</option>
+                  <option value="Colombo, Borella">Colombo, Borella</option>
+                </select>
+                <span className="select-arrow">▼</span>
+              </div>
+            </div>
+          )}
 
           {/* Row 2 */}
           <div className="form-group">
@@ -131,7 +216,7 @@ function Register() {
 
           {/* Row 3 - Full Width */}
           <div className="form-group col-span-2">
-            <label htmlFor="email">email Address</label>
+            <label htmlFor="email">Email Address</label>
             <input 
               type="email" 
               id="email" 
@@ -143,41 +228,41 @@ function Register() {
             />
           </div>
 
-          {/* Row 4 */}
-          <div className="form-group">
-            <label htmlFor="dob">Date of Birth</label>
-            <input 
-              type="date" 
-              id="dob" 
-              className="register-control" 
-              value={dob}
-              onChange={(e) => setDob(e.target.value)}
-              required
-            />
-          </div>
+          {/* Row 4 (Only for Resident) */}
+          {role === 'RESIDENT' && (
+            <>
+              <div className="form-group">
+                <label htmlFor="dob">Date of Birth</label>
+                <input 
+                  type="date" 
+                  id="dob" 
+                  className="register-control" 
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  required
+                />
+              </div>
 
-          <div className="form-group">
-            <label htmlFor="gender">Gender</label>
-            <div className="select-wrapper">
-              <select 
-                id="gender" 
-                className="register-control register-select" 
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-                required
-              >
-                <option value="" disabled hidden></option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-              <span className="select-arrow">
-                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 1.5L6 6.5L11 1.5" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>
-            </div>
-          </div>
+              <div className="form-group">
+                <label htmlFor="gender">Gender</label>
+                <div className="select-wrapper">
+                  <select 
+                    id="gender" 
+                    className="register-control register-select" 
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled hidden></option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <span className="select-arrow">▼</span>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Row 5 */}
           <div className="form-group">
@@ -193,30 +278,31 @@ function Register() {
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="division">Select GN Division</label>
-            <div className="select-wrapper">
-              <select 
-                id="division" 
-                className="register-control register-select" 
-                value={division}
-                onChange={(e) => setDivision(e.target.value)}
-                required
-              >
-                <option value="" disabled hidden></option>
-                <option value="Colombo 03">Colombo 03</option>
-                <option value="Colombo 07">Colombo 07</option>
-                <option value="Kandy Town">Kandy Town</option>
-                <option value="Galle Fort">Galle Fort</option>
-                <option value="Negombo South">Negombo South</option>
-              </select>
-              <span className="select-arrow">
-                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 1.5L6 6.5L11 1.5" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>
+          {role === 'RESIDENT' ? (
+            <div className="form-group">
+              <label htmlFor="division">Select GN Division</label>
+              <div className="select-wrapper">
+                <select 
+                  id="division" 
+                  className="register-control register-select" 
+                  value={division}
+                  onChange={(e) => setDivision(e.target.value)}
+                  required
+                >
+                  <option value="" disabled hidden>Select division</option>
+                  <option value="Colombo 03">Colombo 03</option>
+                  <option value="Colombo 07">Colombo 07</option>
+                  <option value="Kandy Town">Kandy Town</option>
+                  <option value="Galle Fort">Galle Fort</option>
+                  <option value="Negombo South">Negombo South</option>
+                  <option value="Colombo, Borella">Colombo, Borella</option>
+                </select>
+                <span className="select-arrow">▼</span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="form-group" style={{ display: 'none' }}></div>
+          )}
 
           {/* Row 6 */}
           <div className="form-group">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function OfficerAppointments({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -9,162 +10,84 @@ function OfficerAppointments({ onOpenHelp }) {
   const { lang } = useLanguage()
   const t = translations[lang]
 
-  // Retrieve username and officerId from navigation state if available (defaults to Kamal Perera)
-  const successUser = location.state?.successUser || 'Kamal Perera'
-  const officerIdVal = location.state?.officerId || '200324511540'
+  // Retrieve username and officerId from navigation state or localStorage (defaults to Kamal Perera)
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Kamal Perera'
+  const officerIdVal = location.state?.officerId || localStorage.getItem('smartgn_user_id') || 'GN-BORELLA'
 
   // Dynamic appointments list state
   const [appointments, setAppointments] = useState([])
   const [showFullQueue, setShowFullQueue] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Seed default appointment queue matching the mockup (4 visible, 8 waiting)
-  useEffect(() => {
-    const saved = localStorage.getItem('smartgn_officer_appointments')
-    if (saved) {
-      setAppointments(JSON.parse(saved))
-    } else {
-      const defaultQueue = [
-        {
-          id: 1,
-          name: 'Nimal Perera',
-          residentId: '#GN-9901',
-          time: '2026-04-05 at 10:00 AM',
-          purpose: 'Certificate collection',
-          avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        },
-        {
-          id: 2,
-          name: 'Sunethra Silva',
-          residentId: '#GN-4423',
-          time: '2026-04-05 at 11:30 AM',
-          purpose: 'Household verification',
-          avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        },
-        {
-          id: 3,
-          name: 'Ravindu Perera',
-          residentId: '#GN-6670',
-          time: '2026-04-06 at 02:30 PM',
-          purpose: 'ID card application',
-          avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        },
-        {
-          id: 4,
-          name: 'Kanthi Wickrama',
-          residentId: '#GN-1102',
-          time: '2026-04-06 at 09:00 AM',
-          purpose: 'Land title endorsement',
-          avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        },
-        // 8 More requests waiting in the queue
-        {
-          id: 5,
-          name: 'Kamal Silva',
-          residentId: '#GN-1234',
-          time: '2026-04-07 at 10:00 AM',
-          purpose: 'Land valuation report',
-          avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        },
-        {
-          id: 6,
-          name: 'Kamala Perera',
-          residentId: '#GN-5678',
-          time: '2026-04-07 at 11:00 AM',
-          purpose: 'Income certificate verification',
-          avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        },
-        {
-          id: 7,
-          name: 'Kumara Dissanayake',
-          residentId: '#GN-9012',
-          time: '2026-04-07 at 02:00 PM',
-          purpose: 'Signature certification',
-          avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        },
-        {
-          id: 8,
-          name: 'Sanduni Perera',
-          residentId: '#GN-3456',
-          time: '2026-04-08 at 09:30 AM',
-          purpose: 'General inquiry',
-          avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        },
-        {
-          id: 9,
-          name: 'Kasun Wickrama',
-          residentId: '#GN-7890',
-          time: '2026-04-08 at 10:30 AM',
-          purpose: 'Identity certification',
-          avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        },
-        {
-          id: 10,
-          name: 'Kusumawathi Silva',
-          residentId: '#GN-2345',
-          time: '2026-04-08 at 01:30 PM',
-          purpose: 'Allowance inquiry',
-          avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        },
-        {
-          id: 11,
-          name: 'Dissanayake Perera',
-          residentId: '#GN-6789',
-          time: '2026-04-09 at 02:30 PM',
-          purpose: 'Address verification',
-          avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        },
-        {
-          id: 12,
-          name: 'Piyumi Wickrama',
-          residentId: '#GN-0123',
-          time: '2026-04-09 at 03:30 PM',
-          purpose: 'Signature certification',
-          avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100',
-          status: 'Pending'
-        }
-      ]
-      localStorage.setItem('smartgn_officer_appointments', JSON.stringify(defaultQueue))
-      setAppointments(defaultQueue)
+  const loadAppointments = async () => {
+    try {
+      const response = await fetch('/api/appointments/officer', {
+        headers: getAuthHeaders()
+      })
+      if (!response.ok) throw new Error('Failed to load appointments queue.')
+      const data = await response.json()
+      const formatted = data.map(item => ({
+        id: item.appointment_id,
+        name: item.resident_name || 'Resident',
+        residentId: item.resident_nic,
+        time: `${item.date} at ${item.time}`,
+        purpose: item.purpose,
+        avatarUrl: `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100`, // Default fallback avatar
+        status: item.status === 'PENDING' ? 'Pending' : item.status === 'CONFIRMED' ? 'Confirmed' : 'Declined'
+      }))
+      setAppointments(formatted)
+    } catch (err) {
+      console.error(err)
+      const saved = localStorage.getItem('smartgn_officer_appointments')
+      if (saved) setAppointments(JSON.parse(saved))
     }
+  }
+
+  useEffect(() => {
+    loadAppointments()
   }, [])
 
   // Action Handlers
-  const handleConfirm = (id, name) => {
-    const updated = appointments.map(item => {
-      if (item.id === id) {
-        return { ...item, status: 'Confirmed' }
+  const handleConfirm = async (id, name) => {
+    try {
+      const response = await fetch(`/api/appointments/${id}/status`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status: 'CONFIRMED' })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to confirm appointment.')
       }
-      return item
-    })
-    localStorage.setItem('smartgn_officer_appointments', JSON.stringify(updated))
-    setAppointments(updated)
-    alert(`Appointment for ${name} has been successfully confirmed.`)
+
+      alert(`Appointment for ${name} has been successfully confirmed.`)
+      loadAppointments()
+    } catch (err) {
+      alert(err.message || 'Error confirming appointment.')
+    }
   }
 
-  const handleDecline = (id, name) => {
+  const handleDecline = async (id, name) => {
     const confirmDecline = window.confirm(`Are you sure you want to decline the appointment for ${name}?`)
     if (confirmDecline) {
-      const updated = appointments.map(item => {
-        if (item.id === id) {
-          return { ...item, status: 'Declined' }
+      try {
+        const response = await fetch(`/api/appointments/${id}/status`, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ status: 'DECLINED' })
+        })
+
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || 'Failed to decline appointment.')
         }
-        return item
-      })
-      localStorage.setItem('smartgn_officer_appointments', JSON.stringify(updated))
-      setAppointments(updated)
-      alert(`Appointment for ${name} has been declined.`)
+
+        alert(`Appointment for ${name} has been declined.`)
+        loadAppointments()
+      } catch (err) {
+        alert(err.message || 'Error declining appointment.')
+      }
     }
   }
 

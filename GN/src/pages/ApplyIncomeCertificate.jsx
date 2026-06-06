@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function ApplyIncomeCertificate({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -9,9 +10,9 @@ function ApplyIncomeCertificate({ onOpenHelp }) {
   const { lang } = useLanguage()
   const t = translations[lang]
 
-  // Retrieve username and division/ID from navigation state if available (defaults to Nimal Perera)
-  const successUser = location.state?.successUser || 'Nimal Perera'
-  const userDivision = location.state?.division || '200324511540'
+  // Retrieve username and division/ID from navigation state or localStorage (defaults to Nimal Perera)
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Nimal Perera'
+  const userDivision = location.state?.division || localStorage.getItem('smartgn_user_division') || 'Colombo'
 
   // Form Field States
   const [fullName, setFullName] = useState(successUser)
@@ -93,7 +94,7 @@ function ApplyIncomeCertificate({ onOpenHelp }) {
     setErrorMessage('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (incomeStream === 'Paddy') {
@@ -119,10 +120,29 @@ function ApplyIncomeCertificate({ onOpenHelp }) {
     }
 
     setErrorMessage('')
-    alert('Income Certificate Application submitted successfully!')
     
-    // Redirect back to Certificates panel
-    navigate('/dashboard/resident/certificates', { state: { successUser, division: userDivision } })
+    try {
+      const response = await fetch('/api/certificates/apply', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          certificateType: 'INCOME',
+          purpose: purpose,
+          requestDate: new Date().toISOString().split('T')[0],
+          supportingDocs: []
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to submit certificate application')
+      }
+
+      alert('Income Certificate Application submitted successfully!')
+      navigate('/dashboard/resident/certificates', { state: { successUser, division: userDivision } })
+    } catch (err) {
+      setErrorMessage(err.message || 'Error connecting to backend server.')
+    }
   }
 
   return (

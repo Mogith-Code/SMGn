@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function OfficerAnnouncements({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -10,8 +11,8 @@ function OfficerAnnouncements({ onOpenHelp }) {
   const t = translations[lang]
 
   // Retrieve username and officerId from navigation state if available (defaults to Kamal Perera)
-  const successUser = location.state?.successUser || 'Kamal Perera'
-  const officerIdVal = location.state?.officerId || '200324511540'
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Kamal Perera'
+  const officerIdVal = location.state?.officerId || localStorage.getItem('smartgn_user_id') || '200324511540'
 
   // Announcements lists state
   const [announcements, setAnnouncements] = useState([])
@@ -26,54 +27,51 @@ function OfficerAnnouncements({ onOpenHelp }) {
   const [isUrgent, setIsUrgent] = useState(false)
   const [editingId, setEditingId] = useState(null)
 
-  // Seed default dataset on mount matching the screenshots
-  useEffect(() => {
-    const saved = localStorage.getItem('smartgn_announcements')
-    if (saved) {
-      setAnnouncements(JSON.parse(saved))
-    } else {
-      const defaultData = [
-        {
-          id: 1,
-          title: 'Community Health Clinic Schedule',
-          category: 'Health',
-          date: 'Oct 24, 2026 • 09:00 AM',
-          content: 'The upcoming health clinic will focus on pediatric vaccinations and seasonal flu shots. Please ensure all residents bring their health cards and local identification documents. Registration...',
-          status: 'Live'
-        },
-        {
-          id: 2,
-          title: 'Water Supply Maintenance Update',
-          category: 'Utilities',
-          date: 'Oct 23, 2026 • 02:45 PM',
-          content: 'Emergency maintenance work is scheduled for the main reservoir. Residents in Zone B will experience low pressure or complete outage for 4 hours. We apologize for the inconvenience and...',
-          status: 'Urgent'
-        },
-        {
-          id: 3,
-          title: 'School Mid-term Holidays',
-          category: 'Education',
-          date: 'Oct 15, 2026 • 10:00 AM',
-          content: 'Local primary schools will be closed for the mid-term break from October 20th to October 25th. Parents are advised to coordinate childcare. Extracurricular sports activities will still proceed at...',
-          status: 'Archived'
+  const loadAnnouncements = async () => {
+    try {
+      const response = await fetch('/api/announcements/officer', {
+        headers: getAuthHeaders()
+      })
+      if (!response.ok) throw new Error('Failed to load announcements.')
+      const data = await response.json()
+      const formatted = data.map(item => {
+        const dateObj = new Date(item.date)
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        const formattedDate = `${months[dateObj.getMonth()] || 'Oct'} ${dateObj.getDate() || 24}, ${dateObj.getFullYear() || 2026} • ${dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+
+        const isUrgentType = item.type.toLowerCase() === 'urgent'
+        return {
+          id: item.announcement_id,
+          title: item.title,
+          category: isUrgentType ? 'General' : item.type,
+          date: formattedDate,
+          content: item.description,
+          status: isUrgentType ? 'Urgent' : 'Live'
         }
-      ]
-      localStorage.setItem('smartgn_announcements', JSON.stringify(defaultData))
-      setAnnouncements(defaultData)
+      })
+      setAnnouncements(formatted)
+    } catch (err) {
+      console.error(err)
+      const saved = localStorage.getItem('smartgn_announcements')
+      if (saved) setAnnouncements(JSON.parse(saved))
     }
+  }
+
+  useEffect(() => {
+    loadAnnouncements()
   }, [])
 
   // Create Announcement Handlers
   const handleOpenCreate = () => {
     setTitle('')
-    setCategory('')
+    setCategory('General')
     setContent('')
     setIsUrgent(false)
     setEditingId(null)
     setViewMode('CREATE')
   }
 
-  const handlePublish = (e) => {
+  const handlePublish = async (e) => {
     e.preventDefault()
 
     if (!title || !category || !content) {
@@ -81,27 +79,28 @@ function OfficerAnnouncements({ onOpenHelp }) {
       return
     }
 
-    // Format current date and time
-    const today = new Date()
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const formattedDate = `${months[today.getMonth()]} ${today.getDate()}, ${today.getFullYear()} • ${today.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+    try {
+      const response = await fetch('/api/announcements/publish', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          title,
+          description: content,
+          type: isUrgent ? 'Urgent' : category
+        })
+      })
 
-    const nextId = announcements.length > 0 ? Math.max(...announcements.map(a => a.id)) + 1 : 1
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to publish announcement.')
+      }
 
-    const newAnnouncement = {
-      id: nextId,
-      title,
-      category,
-      date: formattedDate,
-      content,
-      status: isUrgent ? 'Urgent' : 'Live'
+      setShowSuccessBanner(true)
+      setViewMode('DASHBOARD')
+      loadAnnouncements()
+    } catch (err) {
+      alert(err.message || 'Error publishing announcement.')
     }
-
-    const updated = [newAnnouncement, ...announcements]
-    localStorage.setItem('smartgn_announcements', JSON.stringify(updated))
-    setAnnouncements(updated)
-    setShowSuccessBanner(true)
-    setViewMode('DASHBOARD')
   }
 
   // Edit Announcement Handlers
@@ -114,7 +113,7 @@ function OfficerAnnouncements({ onOpenHelp }) {
     setViewMode('EDIT')
   }
 
-  const handleSaveChanges = (e) => {
+  const handleSaveChanges = async (e) => {
     e.preventDefault()
 
     if (!title || !category || !content) {
@@ -122,47 +121,76 @@ function OfficerAnnouncements({ onOpenHelp }) {
       return
     }
 
-    const updated = announcements.map(item => {
-      if (item.id === editingId) {
-        return {
-          ...item,
+    try {
+      const response = await fetch(`/api/announcements/${editingId}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
           title,
-          category,
-          content,
-          status: isUrgent ? 'Urgent' : item.status === 'Archived' ? 'Archived' : 'Live'
-        }
-      }
-      return item
-    })
+          description: content,
+          type: isUrgent ? 'Urgent' : category
+        })
+      })
 
-    localStorage.setItem('smartgn_announcements', JSON.stringify(updated))
-    setAnnouncements(updated)
-    setViewMode('DASHBOARD')
-    alert('Announcement updated successfully.')
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update announcement.')
+      }
+
+      setViewMode('DASHBOARD')
+      loadAnnouncements()
+      alert('Announcement updated successfully.')
+    } catch (err) {
+      alert(err.message || 'Error updating announcement.')
+    }
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     const confirmDelete = window.confirm('Are you sure you want to delete this announcement permanently?')
     if (confirmDelete) {
-      const updated = announcements.filter(item => item.id !== editingId)
-      localStorage.setItem('smartgn_announcements', JSON.stringify(updated))
-      setAnnouncements(updated)
-      setViewMode('DASHBOARD')
-      alert('Announcement deleted successfully.')
+      try {
+        const response = await fetch(`/api/announcements/${editingId}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders()
+        })
+
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || 'Failed to delete announcement.')
+        }
+
+        setViewMode('DASHBOARD')
+        loadAnnouncements()
+        alert('Announcement deleted successfully.')
+      } catch (err) {
+        alert(err.message || 'Error deleting announcement.')
+      }
     }
   }
 
   // Restore Archived Announcement
-  const handleRestore = (id, titleText) => {
-    const updated = announcements.map(item => {
-      if (item.id === id) {
-        return { ...item, status: 'Live' }
+  const handleRestore = async (id, titleText) => {
+    try {
+      const response = await fetch(`/api/announcements/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          title: titleText,
+          description: 'Restored Announcement content.',
+          type: 'Live'
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to restore announcement.')
       }
-      return item
-    })
-    localStorage.setItem('smartgn_announcements', JSON.stringify(updated))
-    setAnnouncements(updated)
-    alert(`"${titleText}" has been restored to Live status.`)
+
+      alert(`"${titleText}" has been restored to Live status.`)
+      loadAnnouncements()
+    } catch (err) {
+      alert(err.message || 'Error restoring announcement.')
+    }
   }
 
   return (

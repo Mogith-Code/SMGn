@@ -44,11 +44,13 @@ function ResidentLogin() {
       localStorage.setItem('smartgn_token', data.token)
       localStorage.setItem('smartgn_user_role', 'RESIDENT')
       localStorage.setItem('smartgn_user_id', data.user.nic)
+      localStorage.setItem('smartgn_user_division', data.user.division || 'Colombo, Borella')
+      localStorage.setItem('smartgn_user_name', data.user.name)
 
       navigate('/dashboard/resident', { 
         state: { 
           successUser: data.user.name, 
-          division: 'Colombo, Borella',
+          division: data.user.division || 'Colombo, Borella',
           nic: data.user.nic 
         } 
       })
