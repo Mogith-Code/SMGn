@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function OfficerDisasterReports({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -9,9 +10,9 @@ function OfficerDisasterReports({ onOpenHelp }) {
   const { lang } = useLanguage()
   const t = translations[lang]
 
-  // Retrieve username and officerId from navigation state if available (defaults to Nimal Perera)
-  const successUser = location.state?.successUser || 'Nimal Perera'
-  const officerIdVal = location.state?.officerId || '200324511540'
+  // Retrieve username and officerId from navigation state or localStorage
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Kamal Perera'
+  const officerIdVal = location.state?.officerId || localStorage.getItem('smartgn_user_id') || 'GN-BORELLA'
   const firstName = successUser.split(' ')[0]
 
   // State to manage list of disasters
@@ -24,43 +25,37 @@ function OfficerDisasterReports({ onOpenHelp }) {
   const [modalStatus, setModalStatus] = useState('Pending')
   const [modalRemarks, setModalRemarks] = useState('')
 
-  // Load disasters from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('smartgn_disaster_reports')
-    if (saved) {
-      setDisasters(JSON.parse(saved))
-    } else {
-      const initialDisasters = [
-        {
-          id: 1,
-          type: 'Flood',
-          severity: 'high severity',
-          location: 'Main Street Area',
-          reporter: 'Nimal Perera',
-          date: '2026-04-02',
-          description: 'Heavy rainfall has caused water levels to rise up to 3 feet in the residential zone, flooding ground floors.',
-          contact: '0771234567',
-          aidRequested: 'Emergency evacuation and food packs',
-          status: 'Pending',
-          remarks: ''
-        },
-        {
-          id: 2,
-          type: 'Landslide',
-          severity: 'medium severity',
-          location: 'Hill View',
-          reporter: 'Kamala Silva',
-          date: '2026-04-01',
-          description: 'Minor earth slip near the hill road. Blocked access to two houses. Risk of further slides if rain continues.',
-          contact: '0719876543',
-          aidRequested: 'Clearing debris and temporary sandbags',
-          status: 'Pending',
-          remarks: ''
-        }
-      ]
-      localStorage.setItem('smartgn_disaster_reports', JSON.stringify(initialDisasters))
-      setDisasters(initialDisasters)
+  const loadDisasters = async () => {
+    try {
+      const response = await fetch('/api/disasters/officer', {
+        headers: getAuthHeaders()
+      })
+      if (!response.ok) throw new Error('Failed to load disasters.')
+      const data = await response.json()
+      const formatted = data.map(item => ({
+        id: item.disaster_request_id,
+        type: item.disaster_type,
+        severity: item.severity,
+        location: item.location,
+        reporter: item.resident_name || 'Resident',
+        date: item.request_date ? item.request_date.split('T')[0] : '',
+        description: item.description,
+        contact: item.contact_number,
+        aidRequested: item.aid_requested || 'None specified',
+        status: item.status,
+        remarks: item.officer_remarks || ''
+      }))
+      setDisasters(formatted)
+    } catch (err) {
+      console.error(err)
+      const saved = localStorage.getItem('smartgn_disaster_reports')
+      if (saved) setDisasters(JSON.parse(saved))
     }
+  }
+
+  // Load disasters on mount
+  useEffect(() => {
+    loadDisasters()
   }, [])
 
   // Handle open modal
@@ -73,27 +68,33 @@ function OfficerDisasterReports({ onOpenHelp }) {
   }
 
   // Handle submit action in modal
-  const handleSaveAction = (e) => {
+  const handleSaveAction = async (e) => {
     e.preventDefault()
     if (!selectedDisaster) return
 
-    const updatedDisasters = disasters.map(item => {
-      if (item.id === selectedDisaster.id) {
-        return {
-          ...item,
-          severity: modalSeverity,
+    try {
+      const response = await fetch(`/api/disasters/${selectedDisaster.id}/action`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
           status: modalStatus,
-          remarks: modalRemarks
-        }
-      }
-      return item
-    })
+          severity: modalSeverity,
+          officerRemarks: modalRemarks
+        })
+      })
 
-    localStorage.setItem('smartgn_disaster_reports', JSON.stringify(updatedDisasters))
-    setDisasters(updatedDisasters)
-    setIsModalOpen(false)
-    setSelectedDisaster(null)
-    alert('Disaster status updated successfully.')
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update report.')
+      }
+
+      setIsModalOpen(false)
+      setSelectedDisaster(null)
+      loadDisasters()
+      alert('Disaster status updated successfully.')
+    } catch (err) {
+      alert(err.message || 'Error updating report.')
+    }
   }
 
   return (

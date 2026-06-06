@@ -15,7 +15,7 @@ function Home() {
         {/* ====================================================================== */}
         <div className="w-full h-auto "> {/*border border-amber-900*/}
           <img 
-            src="../../hero-image.png"
+            src="/hero-image.png"
             alt="Grama Niladhari Service - Helping citizens with administrative services"
             className="w-full h-[400px] max-lg:h-[300px] max-md:h-[200px]"
           />

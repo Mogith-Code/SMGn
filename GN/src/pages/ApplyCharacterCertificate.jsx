@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function ApplyCharacterCertificate({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -9,9 +10,9 @@ function ApplyCharacterCertificate({ onOpenHelp }) {
   const { lang } = useLanguage()
   const t = translations[lang]
 
-  // Retrieve username and division/ID from navigation state if available (defaults to Nimal Perera)
-  const successUser = location.state?.successUser || 'Nimal Perera'
-  const userDivision = location.state?.division || '200324511540'
+  // Retrieve username and division/ID from navigation state or localStorage (defaults to Nimal Perera)
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Nimal Perera'
+  const userDivision = location.state?.division || localStorage.getItem('smartgn_user_division') || 'Colombo'
 
   // Form Field States
   const [divisionalSecretariat, setDivisionalSecretariat] = useState('')
@@ -55,7 +56,7 @@ function ApplyCharacterCertificate({ onOpenHelp }) {
     setErrorMessage('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!divisionalSecretariat || !gnDivisionNumber || !fullName || !age || !address || !sex || !civilStatus || !nationality || !religion || !nicNumber || !purpose || !gnPeriod) {
@@ -64,10 +65,29 @@ function ApplyCharacterCertificate({ onOpenHelp }) {
     }
 
     setErrorMessage('')
-    alert('Application submitted successfully!')
     
-    // Redirect back to Certificates panel
-    navigate('/dashboard/resident/certificates', { state: { successUser, division: userDivision } })
+    try {
+      const response = await fetch('/api/certificates/apply', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          certificateType: 'CHARACTER',
+          purpose: purpose,
+          requestDate: new Date().toISOString().split('T')[0],
+          supportingDocs: []
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to submit certificate application')
+      }
+
+      alert('Character certificate application submitted successfully!')
+      navigate('/dashboard/resident/certificates', { state: { successUser, division: userDivision } })
+    } catch (err) {
+      setErrorMessage(err.message || 'Error connecting to backend server.')
+    }
   }
 
   return (

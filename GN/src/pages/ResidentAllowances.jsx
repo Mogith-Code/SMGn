@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function ResidentAllowances({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -10,8 +11,8 @@ function ResidentAllowances({ onOpenHelp }) {
   const t = translations[lang]
 
   // Retrieve username and division from navigation state if available (defaults to Nimal Perera)
-  const successUser = location.state?.successUser || 'Nimal Perera'
-  const userDivision = location.state?.division || 'Colombo'
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Nimal Perera'
+  const userDivision = location.state?.division || localStorage.getItem('smartgn_user_division') || 'Colombo'
   const firstName = successUser.split(' ')[0]
 
   // Allowance Requests State
@@ -20,8 +21,8 @@ function ResidentAllowances({ onOpenHelp }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Form Field States
-  const [applicantName, setApplicantName] = useState(successUser)
-  const [applicantNic, setApplicantNic] = useState('200324511540')
+  const [applicantName, setApplicantName] = useState(localStorage.getItem('smartgn_user_name') || 'Nimal Perera')
+  const [applicantNic, setApplicantNic] = useState(localStorage.getItem('smartgn_user_id') || '200324511540')
   const [purpose, setPurpose] = useState('For certify residence')
   const [income, setIncome] = useState('')
   const [remarks, setRemarks] = useState('')
@@ -31,169 +32,55 @@ function ResidentAllowances({ onOpenHelp }) {
   const [bankName, setBankName] = useState('Bank of Ceylon')
   const [bankBranch, setBankBranch] = useState('')
   const [bankAccount, setBankAccount] = useState('')
-  const [accountHolder, setAccountHolder] = useState(successUser)
+  const [accountHolder, setAccountHolder] = useState(localStorage.getItem('smartgn_user_name') || 'Nimal Perera')
 
-  // Load requests from localStorage on mount
+  const loadRequests = async () => {
+    try {
+      const response = await fetch('/api/allowances/resident', {
+        headers: getAuthHeaders()
+      })
+      if (!response.ok) throw new Error('Failed to load allowance requests.')
+      const data = await response.json()
+      const formatted = data.map(item => {
+        let bankDetailsObj = null;
+        try {
+          bankDetailsObj = typeof item.bank_details === 'string' ? JSON.parse(item.bank_details) : item.bank_details;
+        } catch (e) {
+          bankDetailsObj = item.bank_details;
+        }
+        return {
+          id: item.allowance_id,
+          program: item.allowance_type,
+          purpose: item.income_details ? item.income_details.substring(0, 100) : '',
+          status: item.status === 'PENDING' ? 'Pending' : item.status === 'APPROVED' ? 'Approved' : 'Rejected',
+          bankDetails: bankDetailsObj,
+          paymentStatus: item.payment_status === 'PAID' ? 'Paid' : 'Unpaid',
+          paymentAmount: item.cleared_amount,
+          paymentTransferredAt: item.cleared_time ? new Date(item.cleared_time).toLocaleString() : '',
+          paymentTransactionRef: item.txn_reference,
+          income: item.cleared_amount || '',
+          remarks: item.income_details || ''
+        }
+      })
+      setRequests(formatted)
+    } catch (err) {
+      console.error(err)
+      const saved = localStorage.getItem('smartgn_allowance_requests')
+      if (saved) setRequests(JSON.parse(saved))
+    }
+  }
+
+  // Load requests on mount
   useEffect(() => {
     // Attempt to load from profile for names/NIC pre-fill
     const savedProfile = localStorage.getItem('smartgn_resident_profile')
     if (savedProfile) {
       const parsed = JSON.parse(savedProfile)
       setApplicantName(parsed.fullName || `${parsed.firstName} ${parsed.lastName}`)
-      setApplicantNic(parsed.nic || '200324511540')
+      setApplicantNic(parsed.nic || localStorage.getItem('smartgn_user_id') || '200324511540')
       setAccountHolder(parsed.fullName || `${parsed.firstName} ${parsed.lastName}`)
     }
-
-    const saved = localStorage.getItem('smartgn_allowance_requests')
-    if (saved) {
-      setRequests(JSON.parse(saved))
-    } else {
-      // Seed default requests to perfectly match counts: 5 Pending, 3 Approved, 2 Rejected
-      const defaultRequests = [
-        {
-          id: 1,
-          program: 'Disability Allowance',
-          purpose: 'For certify residence',
-          status: 'Approved',
-          bankDetails: {
-            bankName: 'Bank of Ceylon',
-            branch: 'Colombo 03',
-            accountNumber: '8956321475',
-            accountHolderName: 'Nimal Perera'
-          },
-          paymentStatus: 'Paid',
-          paymentAmount: 5000,
-          paymentTransferredAt: '2026-05-28 10:45 AM',
-          paymentTransactionRef: 'TXN-859203859'
-        },
-        {
-          id: 2,
-          program: 'Aswesuma',
-          purpose: 'For income verification',
-          status: 'Pending',
-          bankDetails: {
-            bankName: 'Commercial Bank',
-            branch: 'Maharagama',
-            accountNumber: '1023456789',
-            accountHolderName: 'Kamala Silva'
-          },
-          paymentStatus: 'Unpaid'
-        },
-        {
-          id: 3,
-          program: 'Samurdhi',
-          purpose: 'For certify residence',
-          status: 'Rejected',
-          bankDetails: {
-            bankName: 'People\'s Bank',
-            branch: 'Colombo 10',
-            accountNumber: '2019485760',
-            accountHolderName: 'Nimal Perera'
-          },
-          paymentStatus: 'Unpaid'
-        },
-        {
-          id: 4,
-          program: 'Elderly Support',
-          purpose: 'For income verification',
-          status: 'Pending',
-          bankDetails: {
-            bankName: 'Sampath Bank',
-            branch: 'Borella',
-            accountNumber: '4019283745',
-            accountHolderName: 'Kamala Silva'
-          },
-          paymentStatus: 'Unpaid'
-        },
-        {
-          id: 5,
-          program: 'Kidney Disease Support',
-          purpose: 'For certify residence',
-          status: 'Approved',
-          bankDetails: {
-            bankName: 'Bank of Ceylon',
-            branch: 'Colombo 03',
-            accountNumber: '8956321475',
-            accountHolderName: 'Nimal Perera'
-          },
-          paymentStatus: 'Paid',
-          paymentAmount: 7500,
-          paymentTransferredAt: '2026-05-29 02:15 PM',
-          paymentTransactionRef: 'TXN-902847120'
-        },
-        // Seed extra items to balance the stats: 5 Pending, 3 Approved, 2 Rejected
-        {
-          id: 6,
-          program: 'Aswesuma',
-          purpose: 'For livelihood support',
-          status: 'Pending',
-          bankDetails: {
-            bankName: 'Bank of Ceylon',
-            branch: 'Colombo 03',
-            accountNumber: '8956321475',
-            accountHolderName: 'Nimal Perera'
-          },
-          paymentStatus: 'Unpaid'
-        },
-        {
-          id: 7,
-          program: 'Samurdhi',
-          purpose: 'For family relief',
-          status: 'Pending',
-          bankDetails: {
-            bankName: 'Bank of Ceylon',
-            branch: 'Colombo 03',
-            accountNumber: '8956321475',
-            accountHolderName: 'Nimal Perera'
-          },
-          paymentStatus: 'Unpaid'
-        },
-        {
-          id: 8,
-          program: 'Disability Allowance',
-          purpose: 'For medical support',
-          status: 'Pending',
-          bankDetails: {
-            bankName: 'Bank of Ceylon',
-            branch: 'Colombo 03',
-            accountNumber: '8956321475',
-            accountHolderName: 'Nimal Perera'
-          },
-          paymentStatus: 'Unpaid'
-        },
-        {
-          id: 9,
-          program: 'Elderly Support',
-          purpose: 'For pension support',
-          status: 'Approved',
-          bankDetails: {
-            bankName: 'Bank of Ceylon',
-            branch: 'Colombo 03',
-            accountNumber: '8956321475',
-            accountHolderName: 'Nimal Perera'
-          },
-          paymentStatus: 'Paid',
-          paymentAmount: 5000,
-          paymentTransferredAt: '2026-05-30 09:12 AM',
-          paymentTransactionRef: 'TXN-382947102'
-        },
-        {
-          id: 10,
-          program: 'Kidney Disease Support',
-          purpose: 'For medical aid',
-          status: 'Rejected',
-          bankDetails: {
-            bankName: 'Bank of Ceylon',
-            branch: 'Colombo 03',
-            accountNumber: '8956321475',
-            accountHolderName: 'Nimal Perera'
-          },
-          paymentStatus: 'Unpaid'
-        }
-      ]
-      localStorage.setItem('smartgn_allowance_requests', JSON.stringify(defaultRequests))
-      setRequests(defaultRequests)
-    }
+    loadRequests()
   }, [])
 
   // Calculate dynamic stats
@@ -201,8 +88,8 @@ function ResidentAllowances({ onOpenHelp }) {
   const approvedCount = requests.filter(item => item.status === 'Approved').length
   const rejectedCount = requests.filter(item => item.status === 'Rejected').length
 
-  // Main visual status list from the screenshot
-  const visibleHistory = requests.filter(item => [1, 2, 3, 4, 5].includes(item.id) || item.id > 10)
+  // Main visual status list
+  const visibleHistory = requests
 
   // Trigger Modal Open with pre-selected program
   const handleOpenApply = (programName) => {
@@ -216,7 +103,7 @@ function ResidentAllowances({ onOpenHelp }) {
   }
 
   // Handle Application Submit
-  const handleConfirmApplication = (e) => {
+  const handleConfirmApplication = async (e) => {
     e.preventDefault()
 
     if (!income) {
@@ -231,31 +118,34 @@ function ResidentAllowances({ onOpenHelp }) {
 
     setErrorMessage('')
 
-    const nextId = requests.length > 0 ? Math.max(...requests.map(r => r.id)) + 1 : 11
-    const newRequest = {
-      id: nextId,
-      program: selectedProgram,
-      purpose: purpose,
-      status: 'Pending',
-      bankDetails: {
-        bankName,
-        branch: bankBranch,
-        accountNumber: bankAccount,
-        accountHolderName: accountHolder
-      },
-      paymentStatus: 'Unpaid',
-      applicantName,
-      nic: applicantNic,
-      income,
-      remarks,
-      submittedDate: new Date().toISOString().split('T')[0]
-    }
+    try {
+      const response = await fetch('/api/allowances/apply', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          allowanceType: selectedProgram,
+          incomeDetails: `Household Monthly Income: LKR ${income}. Purpose: ${purpose}. Remarks: ${remarks}`,
+          bankDetails: {
+            bankName,
+            branch: bankBranch,
+            accountNumber: bankAccount,
+            accountHolderName: accountHolder
+          }
+        })
+      })
 
-    const updated = [newRequest, ...requests]
-    localStorage.setItem('smartgn_allowance_requests', JSON.stringify(updated))
-    setRequests(updated)
-    setIsModalOpen(false)
-    alert(`Application for ${selectedProgram} submitted successfully! Your secure tracking ID is SmartGN-AL-${nextId}.`)
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to submit application.')
+      }
+
+      const resData = await response.json()
+      setIsModalOpen(false)
+      loadRequests()
+      alert(`Application for ${selectedProgram} submitted successfully! Your secure tracking ID is ${resData.allowanceId}.`)
+    } catch (err) {
+      setErrorMessage(err.message || 'Error submitting application.')
+    }
   }
 
   return (

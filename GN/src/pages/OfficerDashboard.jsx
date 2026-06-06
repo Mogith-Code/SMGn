@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function OfficerDashboard({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -10,11 +11,11 @@ function OfficerDashboard({ onOpenHelp }) {
   const t = translations[lang]
 
   // Retrieve username and officerId from navigation state if available (defaults to Kamal Perera)
-  const successUser = location.state?.successUser || 'Kamal Perera'
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Kamal Perera'
   
   // Extract first name for the personal greeting
   const firstName = successUser.split(' ')[0]
-  const officerIdVal = location.state?.officerId || '200324511540'
+  const officerIdVal = location.state?.officerId || localStorage.getItem('smartgn_user_id') || '200324511540'
 
   const localDict = {
     EN: {
@@ -75,18 +76,67 @@ function OfficerDashboard({ onOpenHelp }) {
   // State to manage dismissing the alert banner
   const [showAlert, setShowAlert] = useState(true)
 
-  // State for dynamic active disasters count
-  const [activeDisastersCount, setActiveDisastersCount] = useState(2)
+  // States for dynamic database counts
+  const [totalResidents, setTotalResidents] = useState(0)
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0)
+  const [activeDisastersCount, setActiveDisastersCount] = useState(0)
+  const [announcements, setAnnouncements] = useState([])
 
   useEffect(() => {
-    const saved = localStorage.getItem('smartgn_disaster_reports')
-    if (saved) {
-      const allDisasters = JSON.parse(saved)
-      const activeCount = allDisasters.filter(item => item.status !== 'Resolved').length
-      setActiveDisastersCount(activeCount)
-    } else {
-      setActiveDisastersCount(2)
+    const fetchDashboardData = async () => {
+      try {
+        const headers = getAuthHeaders()
+
+        // 1. Fetch total residents count
+        const resCountRes = await fetch('/api/auth/officer/residents/count', { headers })
+        const resCountData = resCountRes.ok ? await resCountRes.json() : { count: 0 }
+        setTotalResidents(resCountData.count)
+
+        // 2. Fetch certificates
+        const certRes = await fetch('/api/certificates/officer', { headers })
+        const certs = certRes.ok ? await certRes.json() : []
+
+        // 3. Fetch allowances
+        const allowRes = await fetch('/api/allowances/officer', { headers })
+        const allowances = allowRes.ok ? await allowRes.json() : []
+
+        // 4. Fetch appointments
+        const apptRes = await fetch('/api/appointments/officer', { headers })
+        const appts = apptRes.ok ? await apptRes.json() : []
+
+        // 5. Fetch disasters
+        const disasterRes = await fetch('/api/disasters/officer', { headers })
+        const disasters = disasterRes.ok ? await disasterRes.json() : []
+
+        // Calculate pending and active counts
+        const pendingCerts = certs.filter(c => c.status === 'PENDING').length
+        const pendingAllows = allowances.filter(a => a.status === 'PENDING').length
+        const pendingAppts = appts.filter(a => a.status === 'PENDING').length
+        setPendingRequestsCount(pendingCerts + pendingAllows + pendingAppts)
+
+        const activeDis = disasters.filter(d => d.status !== 'Resolved').length
+        setActiveDisastersCount(activeDis)
+
+      } catch (err) {
+        console.error('Error loading officer dashboard stats:', err)
+      }
     }
+
+    const fetchAnnouncements = async () => {
+      try {
+        const headers = getAuthHeaders()
+        const response = await fetch('/api/announcements/officer', { headers })
+        if (response.ok) {
+          const data = await response.json()
+          setAnnouncements(data.slice(0, 5))
+        }
+      } catch (err) {
+        console.error('Error fetching officer announcements:', err)
+      }
+    }
+
+    fetchDashboardData()
+    fetchAnnouncements()
   }, [])
 
   return (
@@ -248,8 +298,8 @@ function OfficerDashboard({ onOpenHelp }) {
                 </svg>
               </div>
               <span className="stat-label">{d.totalRes}</span>
-              <span className="stat-value">1,2400</span>
-              <span className="stat-subtext-note">+12 {lang === 'EN' ? 'this month' : lang === 'SI' ? 'මෙම මාසයේ' : 'இந்த மாதம்'}</span>
+              <span className="stat-value">{totalResidents}</span>
+              <span className="stat-subtext-note">+0 {lang === 'EN' ? 'this month' : lang === 'SI' ? 'මෙම මාසයේ' : 'இந்த மாதம்'}</span>
             </div>
 
             {/* Card 2: Pending Requests */}
@@ -263,7 +313,7 @@ function OfficerDashboard({ onOpenHelp }) {
                 </svg>
               </div>
               <span className="stat-label">{d.pendingReq}</span>
-              <span className="stat-value">3</span>
+              <span className="stat-value">{pendingRequestsCount}</span>
             </div>
 
             {/* Card 3: Active Disaster */}
@@ -339,36 +389,54 @@ function OfficerDashboard({ onOpenHelp }) {
             </div>
 
             <div className="announcements-rows-list">
-              
-              {/* Row 1: Active item */}
-              <div className="announcement-row-item" style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
-                <div className="announcement-left-group">
-                  <span className="announcement-icon-bullet">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    </svg>
-                  </span>
-                  <span className="announcement-title-txt">{d.camp}</span>
-                </div>
-                <div className="announcement-right-group">
-                  <span className="announcement-date">April 10, 2026</span>
-                  <span className="announcement-tag">{d.campTag}</span>
-                </div>
-              </div>
-
-              {/* Rows 2, 3, 4, 5: Interactive Add Announcement Placeholders */}
-              <div className="announcement-row-placeholder clickable-placeholder" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
-                <span>{d.addNew}</span>
-              </div>
-              <div className="announcement-row-placeholder clickable-placeholder" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
-                <span>{d.addNew}</span>
-              </div>
-              <div className="announcement-row-placeholder clickable-placeholder" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
-                <span>{d.addNew}</span>
-              </div>
-              <div className="announcement-row-placeholder clickable-placeholder" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
-                <span>{d.addNew}</span>
-              </div>
+              {announcements.length > 0 ? (
+                announcements.map((item, idx) => (
+                  <div key={item.announcement_id || idx} className="announcement-row-item" style={{ height: 'auto', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="announcement-left-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className="announcement-icon-bullet" style={{ display: 'flex', alignItems: 'center' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
+                          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        </svg>
+                      </span>
+                      <div style={{ textAlign: 'left' }}>
+                        <span className="announcement-title-txt" style={{ display: 'block', fontWeight: '800', color: '#1e293b' }}>{item.title}</span>
+                        <span style={{ fontSize: '11.5px', color: '#64748b' }}>{item.description}</span>
+                      </div>
+                    </div>
+                    <div className="announcement-right-group" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                      <span className="announcement-date" style={{ fontSize: '11.5px', color: '#64748b' }}>
+                        {item.date ? new Date(item.date).toLocaleDateString() : '2026-05-15'}
+                      </span>
+                      <span className="announcement-tag" style={{ fontSize: '10px', background: '#fef3c7', color: '#d97706', padding: '2px 8px', borderRadius: '50px', fontWeight: '750', textTransform: 'uppercase' }}>
+                        {item.type}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="announcement-row-item" style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
+                    <div className="announcement-left-group">
+                      <span className="announcement-icon-bullet">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
+                          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        </svg>
+                      </span>
+                      <span className="announcement-title-txt">{d.camp}</span>
+                    </div>
+                    <div className="announcement-right-group">
+                      <span className="announcement-date">April 10, 2026</span>
+                      <span className="announcement-tag">{d.campTag}</span>
+                    </div>
+                  </div>
+                  <div className="announcement-row-placeholder clickable-placeholder" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
+                    <span>{d.addNew}</span>
+                  </div>
+                  <div className="announcement-row-placeholder clickable-placeholder" onClick={() => navigate('/dashboard/officer/announcements', { state: { successUser, officerId: officerIdVal } })}>
+                    <span>{d.addNew}</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

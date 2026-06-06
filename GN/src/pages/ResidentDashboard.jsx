@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function ResidentDashboard({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -10,27 +11,70 @@ function ResidentDashboard({ onOpenHelp }) {
   const t = translations[lang]
 
   // Retrieve username and division from navigation state if available (defaults to Nimal Perera)
-  const successUser = location.state?.successUser || 'Nimal Perera'
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Nimal Perera'
   
   // Extract first name for the personal greeting
   const firstName = successUser.split(' ')[0]
-  const userDivision = location.state?.division || 'Colombo'
+  const userDivision = location.state?.division || localStorage.getItem('smartgn_user_division') || 'Colombo'
 
   // State to manage dismissing the alert banner
   const [showAlert, setShowAlert] = useState(true)
 
-  // State for dynamic appointments count
-  const [upcomingAppointmentsCount, setUpcomingAppointmentsCount] = useState(3)
+  // States for dynamic database counts
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0)
+  const [approvedRequestsCount, setApprovedRequestsCount] = useState(0)
+  const [upcomingAppointmentsCount, setUpcomingAppointmentsCount] = useState(0)
+  const [announcements, setAnnouncements] = useState([])
 
   useEffect(() => {
-    const saved = localStorage.getItem('smartgn_appointments')
-    if (saved) {
-      const allApps = JSON.parse(saved)
-      const approvedCount = allApps.filter(item => item.status === 'Approved').length
-      setUpcomingAppointmentsCount(approvedCount)
-    } else {
-      setUpcomingAppointmentsCount(3) // Seeded approved count
+    const fetchDashboardData = async () => {
+      try {
+        const headers = getAuthHeaders()
+        
+        // 1. Fetch certificates
+        const certRes = await fetch('/api/certificates/resident', { headers })
+        const certs = certRes.ok ? await certRes.json() : []
+
+        // 2. Fetch allowances
+        const allowRes = await fetch('/api/allowances/resident', { headers })
+        const allowances = allowRes.ok ? await allowRes.json() : []
+
+        // 3. Fetch appointments
+        const apptRes = await fetch('/api/appointments/resident', { headers })
+        const appts = apptRes.ok ? await apptRes.json() : []
+
+        // Calculate pending and approved counts
+        const pendingCerts = certs.filter(c => c.status === 'PENDING').length
+        const pendingAllows = allowances.filter(a => a.status === 'PENDING').length
+        const pendingAppts = appts.filter(a => a.status === 'PENDING').length
+        setPendingRequestsCount(pendingCerts + pendingAllows + pendingAppts)
+
+        const approvedCerts = certs.filter(c => c.status === 'APPROVED').length
+        const approvedAllows = allowances.filter(a => a.status === 'APPROVED').length
+        setApprovedRequestsCount(approvedCerts + approvedAllows)
+
+        const confirmedAppts = appts.filter(a => a.status === 'CONFIRMED').length
+        setUpcomingAppointmentsCount(confirmedAppts)
+
+      } catch (err) {
+        console.error('Error loading resident dashboard stats:', err)
+      }
     }
+
+    const fetchAnnouncements = async () => {
+      try {
+        const response = await fetch('/api/announcements/feed')
+        if (response.ok) {
+          const data = await response.json()
+          setAnnouncements(data.slice(0, 5))
+        }
+      } catch (err) {
+        console.error('Error fetching announcements feed:', err)
+      }
+    }
+
+    fetchDashboardData()
+    fetchAnnouncements()
   }, [])
 
   const localDict = {
@@ -246,7 +290,7 @@ function ResidentDashboard({ onOpenHelp }) {
                 </svg>
               </div>
               <span className="stat-label">{d.pendingReq}</span>
-              <span className="stat-value">3</span>
+              <span className="stat-value">{pendingRequestsCount}</span>
             </div>
 
             {/* Card 2: Approved Requests */}
@@ -258,7 +302,7 @@ function ResidentDashboard({ onOpenHelp }) {
                 </svg>
               </div>
               <span className="stat-label">{d.approvedReq}</span>
-              <span className="stat-value">5</span>
+              <span className="stat-value">{approvedRequestsCount}</span>
             </div>
 
             {/* Card 3: Upcoming Appointments */}
@@ -305,7 +349,7 @@ function ResidentDashboard({ onOpenHelp }) {
                 <span className="action-right-arrow">➔</span>
               </button>
 
-              <button className="action-button-item" onClick={() => navigate('/login')}>
+              <button className="action-button-item" onClick={() => navigate('/dashboard/resident/allowances', { state: { successUser, division: userDivision } })}>
                 <div className="action-left-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
                     <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
@@ -333,32 +377,55 @@ function ResidentDashboard({ onOpenHelp }) {
           <div className="dashboard-announcements-card">
             <div className="announcements-card-header">
               <h3 className="card-inner-title" style={{ margin: 0 }}>{d.announcements}</h3>
-              <span className="view-all-link">{d.viewAll}</span>
+              <span className="view-all-link" style={{ cursor: 'pointer' }} onClick={() => alert('Announcements feed is displayed below.')}>{d.viewAll}</span>
             </div>
 
             <div className="announcements-rows-list">
-              
-              {/* Row 1: Active item */}
-              <div className="announcement-row-item">
-                <div className="announcement-left-group">
-                  <span className="announcement-icon-bullet">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    </svg>
-                  </span>
-                  <span className="announcement-title-txt">{d.camp}</span>
-                </div>
-                <div className="announcement-right-group">
-                  <span className="announcement-date">April 10, 2026</span>
-                  <span className="announcement-tag">{d.campTag}</span>
-                </div>
-              </div>
-
-              {/* Rows 2, 3, 4, 5: Empty Placeholder Boxes */}
-              <div className="announcement-row-placeholder"></div>
-              <div className="announcement-row-placeholder"></div>
-              <div className="announcement-row-placeholder"></div>
-              <div className="announcement-row-placeholder"></div>
+              {announcements.length > 0 ? (
+                announcements.map((item, idx) => (
+                  <div key={item.announcement_id || idx} className="announcement-row-item" style={{ height: 'auto', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="announcement-left-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className="announcement-icon-bullet" style={{ display: 'flex', alignItems: 'center' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
+                          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        </svg>
+                      </span>
+                      <div style={{ textAlign: 'left' }}>
+                        <span className="announcement-title-txt" style={{ display: 'block', fontWeight: '800', color: '#1e293b' }}>{item.title}</span>
+                        <span style={{ fontSize: '11.5px', color: '#64748b' }}>{item.description}</span>
+                      </div>
+                    </div>
+                    <div className="announcement-right-group" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                      <span className="announcement-date" style={{ fontSize: '11.5px', color: '#64748b' }}>
+                        {item.date ? new Date(item.date).toLocaleDateString() : '2026-05-15'}
+                      </span>
+                      <span className="announcement-tag" style={{ fontSize: '10px', background: '#fef3c7', color: '#d97706', padding: '2px 8px', borderRadius: '50px', fontWeight: '750', textTransform: 'uppercase' }}>
+                        {item.type}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="announcement-row-item">
+                    <div className="announcement-left-group">
+                      <span className="announcement-icon-bullet">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
+                          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        </svg>
+                      </span>
+                      <span className="announcement-title-txt">{d.camp}</span>
+                    </div>
+                    <div className="announcement-right-group">
+                      <span className="announcement-date">April 10, 2026</span>
+                      <span className="announcement-tag">{d.campTag}</span>
+                    </div>
+                  </div>
+                  <div className="announcement-row-placeholder"></div>
+                  <div className="announcement-row-placeholder"></div>
+                  <div className="announcement-row-placeholder"></div>
+                </>
+              )}
             </div>
           </div>
 

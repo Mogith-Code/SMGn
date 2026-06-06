@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function ResidentDisasterReport({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -9,9 +10,9 @@ function ResidentDisasterReport({ onOpenHelp }) {
   const { lang } = useLanguage()
   const t = translations[lang]
 
-  // Retrieve username and division/ID from navigation state if available (defaults to Nimal Perera)
-  const successUser = location.state?.successUser || 'Nimal Perera'
-  const userDivision = location.state?.division || 'Colombo'
+  // Retrieve username and division/ID from navigation state or localStorage (defaults to Nimal Perera)
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Nimal Perera'
+  const userDivision = location.state?.division || localStorage.getItem('smartgn_user_division') || 'Colombo'
   const firstName = successUser.split(' ')[0]
 
   // Form Fields
@@ -31,46 +32,36 @@ function ResidentDisasterReport({ onOpenHelp }) {
     loadDisasters()
   }, [])
 
-  const loadDisasters = () => {
-    const saved = localStorage.getItem('smartgn_disaster_reports')
-    if (saved) {
-      const allDisasters = JSON.parse(saved)
-      // Filter disasters reported by the active resident
-      const filtered = allDisasters.filter(item => item.reporter === successUser)
-      setMyDisasters(filtered)
-    } else {
-      // Seed default initial data if empty
-      const initialDisasters = [
-        {
-          id: 1,
-          type: 'Flood',
-          severity: 'high severity',
-          location: 'Main Street Area',
-          reporter: 'Nimal Perera',
-          date: '2026-04-02',
-          description: 'Heavy rainfall has caused water levels to rise up to 3 feet in the residential zone, flooding ground floors.',
-          contact: '0771234567',
-          aidRequested: 'Emergency evacuation and food packs',
-          status: 'Pending',
-          remarks: ''
-        },
-        {
-          id: 2,
-          type: 'Landslide',
-          severity: 'medium severity',
-          location: 'Hill View',
-          reporter: 'Kamala Silva',
-          date: '2026-04-01',
-          description: 'Minor earth slip near the hill road. Blocked access to two houses. Risk of further slides if rain continues.',
-          contact: '0719876543',
-          aidRequested: 'Clearing debris and temporary sandbags',
-          status: 'Pending',
-          remarks: ''
-        }
-      ]
-      localStorage.setItem('smartgn_disaster_reports', JSON.stringify(initialDisasters))
-      const filtered = initialDisasters.filter(item => item.reporter === successUser)
-      setMyDisasters(filtered)
+  const loadDisasters = async () => {
+    try {
+      const response = await fetch('/api/disasters/resident', {
+        headers: getAuthHeaders()
+      })
+      if (!response.ok) throw new Error('Failed to load disaster history.')
+      const data = await response.json()
+      const formatted = data.map(item => ({
+        id: item.disaster_request_id,
+        type: item.disaster_type,
+        severity: item.severity,
+        location: item.location,
+        reporter: successUser,
+        date: item.request_date ? item.request_date.split('T')[0] : '',
+        description: item.description,
+        contact: item.contact_number,
+        aidRequested: item.aid_requested || 'None specified',
+        status: item.status,
+        remarks: item.officer_remarks || ''
+      }))
+      setMyDisasters(formatted)
+    } catch (err) {
+      console.error(err)
+      // Fallback
+      const saved = localStorage.getItem('smartgn_disaster_reports')
+      if (saved) {
+        const allDisasters = JSON.parse(saved)
+        const filtered = allDisasters.filter(item => item.reporter === successUser)
+        setMyDisasters(filtered)
+      }
     }
   }
 
@@ -86,7 +77,7 @@ function ResidentDisasterReport({ onOpenHelp }) {
   }
 
   // Handle submit new report
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!locationArea || !description || !contactNumber) {
@@ -96,33 +87,31 @@ function ResidentDisasterReport({ onOpenHelp }) {
 
     setErrorMessage('')
 
-    const saved = localStorage.getItem('smartgn_disaster_reports')
-    const allDisasters = saved ? JSON.parse(saved) : []
+    try {
+      const response = await fetch('/api/disasters/report', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          disasterType,
+          description,
+          severity,
+          location: locationArea,
+          contact: contactNumber,
+          aidRequested
+        })
+      })
 
-    // Generate new unique ID
-    const nextId = allDisasters.length > 0 ? Math.max(...allDisasters.map(d => d.id)) + 1 : 1
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit report.')
+      }
 
-    const newReport = {
-      id: nextId,
-      type: disasterType,
-      severity: severity,
-      location: locationArea,
-      reporter: successUser,
-      date: new Date().toISOString().split('T')[0], // Current YYYY-MM-DD
-      description: description,
-      contact: contactNumber,
-      aidRequested: aidRequested || 'None specified',
-      status: 'Pending',
-      remarks: ''
+      handleReset()
+      loadDisasters()
+      alert('Disaster report submitted successfully! The Grama Niladhari division office has been notified.')
+    } catch (err) {
+      setErrorMessage(err.message || 'Error submitting report.')
     }
-
-    const updatedAll = [newReport, ...allDisasters]
-    localStorage.setItem('smartgn_disaster_reports', JSON.stringify(updatedAll))
-    
-    // Reset form and reload
-    handleReset()
-    loadDisasters()
-    alert('Disaster report submitted successfully! The Grama Niladhari division office has been notified.')
   }
 
   return (
