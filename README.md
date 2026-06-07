@@ -147,9 +147,9 @@ To ensure clear development ownership, the frontend pages, components, and backe
 | **4** | **Digital Certificate Service** | C. Mosith | 22CSE0394 | - [ApplyCharacterCertificate.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/ApplyCharacterCertificate.jsx)<br>- [ApplyIncomeCertificate.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/ApplyIncomeCertificate.jsx)<br>- [ResidentCertificates.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/ResidentCertificates.jsx)<br>- [OfficerCertificates.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/OfficerCertificates.jsx)<br>- [OfficerCertificateDetails.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/OfficerCertificateDetails.jsx) | - [certificates.js](file:///d:/SmartGn-Anti/SmartGN/backend/routes/certificates.js) |
 | **5** | **Government Allowance & Welfare** | H.S.A. Melan | 22CSE0361 | - [ResidentAllowances.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/ResidentAllowances.jsx)<br>- [OfficerAllowances.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/OfficerAllowances.jsx) | - [allowances.js](file:///d:/SmartGn-Anti/SmartGN/backend/routes/allowances.js) |
 | **6** | **Appointment & Meeting Scheduler** | W.L.V.J.C. Warapitiya | 22CSE0371 | - [ResidentAppointments.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/ResidentAppointments.jsx)<br>- [OfficerAppointments.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/OfficerAppointments.jsx) | - [appointments.js](file:///d:/SmartGn-Anti/SmartGN/backend/routes/appointments.js) |
-| **7** | **Disaster & Emergency Relief** | Collaborative Team | Shared | - [ResidentDisasterReport.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/ResidentDisasterReport.jsx)<br>- [OfficerDisasterReports.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/OfficerDisasterReports.jsx) | - [disasters.js](file:///d:/SmartGn-Anti/SmartGN/backend/routes/disasters.js) |
-| **8** | **AI Chatbot & Information** | Collaborative Team | Shared | - [LandingPage.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/LandingPage.jsx)<br>- [Chatbot.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/components/Chatbot.jsx)<br>- [LanguageSelector.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/components/LanguageSelector.jsx) | - *Integrations across routes* |
-| **9** | **Village Asset & Admin** | Collaborative Team | Shared | - [AdminDashboard.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/AdminDashboard.jsx)<br>- [OfficerDashboard.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/OfficerDashboard.jsx) | - [announcements.js](file:///d:/SmartGn-Anti/SmartGN/backend/routes/announcements.js) |
+| **7** | **Disaster & Emergency Relief** | H.S.A. Melan | 22CSE0361 | - [ResidentDisasterReport.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/ResidentDisasterReport.jsx)<br>- [OfficerDisasterReports.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/OfficerDisasterReports.jsx) | - [disasters.js](file:///d:/SmartGn-Anti/SmartGN/backend/routes/disasters.js) |
+| **8** | **AI Chatbot & Information** | C. Mosith | 22CSE0394 | - [LandingPage.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/LandingPage.jsx)<br>- [Chatbot.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/components/Chatbot.jsx)<br>- [LanguageSelector.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/components/LanguageSelector.jsx) | - *Integrations across routes* |
+| **9** | **Village Asset & Admin** | W.L.V.J.C. Warapitiya | 22CSE0371 | - [AdminDashboard.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/AdminDashboard.jsx)<br>- [OfficerDashboard.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/OfficerDashboard.jsx) | - [announcements.js](file:///d:/SmartGn-Anti/SmartGN/backend/routes/announcements.js) |
 
 ### 🛠️ Detailed Component & Route Tasks Breakdowns
 
@@ -200,14 +200,14 @@ To ensure clear development ownership, the frontend pages, components, and backe
 * **Backend Routers:**
   * [appointments.js](file:///d:/SmartGn-Anti/SmartGN/backend/routes/appointments.js): Calendar-check query helper endpoints, appointment requests validation routes, notification alerts trigger hook.
 
-#### 7. Disaster and Emergency Relief (Collaborative Team)
+#### 7. Disaster and Emergency Relief (H.S.A. Melan - 22CSE0361)
 * **Frontend Components:**
   * [ResidentDisasterReport.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/ResidentDisasterReport.jsx): Submit disaster alerts, specify affected resources (damage description, severity level), track aid request statuses.
   * [OfficerDisasterReports.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/OfficerDisasterReports.jsx): Relief dashboard listing incidents by category/location, update logistics and financial relief allocations.
 * **Backend Routers:**
   * [disasters.js](file:///d:/SmartGn-Anti/SmartGN/backend/routes/disasters.js): Incident reporting logic, coordinates/relatives associations, relief distributions tracking APIs.
 
-#### 8. AI Chatbot and Information (Collaborative Team)
+#### 8. AI Chatbot and Information (C. Mosith - 22CSE0394)
 * **Frontend Components:**
   * [LandingPage.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/LandingPage.jsx): Entry dashboard featuring welcome headers, site overview sliders, quick navigation links.
   * [Chatbot.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/components/Chatbot.jsx): Floatable overlay chat widget allowing interactive text input, fetching responses from automated knowledge base APIs.
@@ -215,7 +215,7 @@ To ensure clear development ownership, the frontend pages, components, and backe
 * **Backend Routers:**
   * Chatbot response query processors, session tracking endpoints, Knowledge base retrieval system.
 
-#### 9. Village Asset and Admin (Collaborative Team)
+#### 9. Village Asset and Admin (W.L.V.J.C. Warapitiya - 22CSE0371)
 * **Frontend Components:**
   * [AdminDashboard.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/AdminDashboard.jsx): Statistics counters (active registrations, approved certificates), audit history table, officer profiles management dashboard.
   * [OfficerDashboard.jsx](file:///d:/SmartGn-Anti/SmartGN/GN/src/pages/OfficerDashboard.jsx): GN management workspace with divisional resources status charts, activity logs, summary stats.
