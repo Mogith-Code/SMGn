@@ -1,12 +1,29 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 
 const router = express.Router();
 
 const authUser = (req, res, next) => {
-  req.user = { id: req.headers['x-user-id'] || 'GN-BORELLA', role: req.headers['x-user-role'] || 'OFFICER' };
-  next();
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: 'Authorization header required.' });
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    req.user = { id: decoded.id, role: decoded.role, name: decoded.name };
+    next();
+  } catch (err) {
+    // Fallback/backwards compatibility with custom headers
+    const userId = req.headers['x-user-id'];
+    const userRole = req.headers['x-user-role'];
+    if (userId && userRole) {
+      req.user = { id: userId, role: userRole };
+      return next();
+    }
+    return res.status(401).json({ error: 'Invalid or expired authorization token.' });
+  }
 };
 
 // 1. Create Announcement (GN Officer)
@@ -61,6 +78,39 @@ router.get('/officer', authUser, async (req, res) => {
       [officerId]
     );
     res.status(200).json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 4. Update Announcement (GN Officer)
+router.put('/:id', authUser, async (req, res) => {
+  const { id } = req.params;
+  const { title, description, type } = req.body;
+
+  try {
+    await pool.query(
+      `UPDATE announcement 
+       SET title = ?, description = ?, type = ? 
+       WHERE announcement_id = ?`,
+      [title, description, type, id]
+    );
+    res.status(200).json({ success: true, message: 'Announcement updated successfully.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 5. Delete Announcement (GN Officer)
+router.delete('/:id', authUser, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await pool.query(
+      `DELETE FROM announcement WHERE announcement_id = ?`,
+      [id]
+    );
+    res.status(200).json({ success: true, message: 'Announcement deleted permanently.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

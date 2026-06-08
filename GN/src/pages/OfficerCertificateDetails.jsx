@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function OfficerCertificateDetails({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -11,8 +12,8 @@ function OfficerCertificateDetails({ onOpenHelp }) {
   const t = translations[lang]
 
   // Session user details
-  const successUser = location.state?.successUser || 'Kamal Perera'
-  const officerIdVal = location.state?.officerId || '200324511540'
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Kamal Perera'
+  const officerIdVal = location.state?.officerId || localStorage.getItem('smartgn_user_id') || 'GN-BORELLA'
 
   // States
   const [certRequest, setCertRequest] = useState(null)
@@ -24,25 +25,45 @@ function OfficerCertificateDetails({ onOpenHelp }) {
   const [signatureMatch, setSignatureMatch] = useState(false)
   const [billsVerified, setBillsVerified] = useState(false)
 
-  useEffect(() => {
-    const saved = localStorage.getItem('smartgn_certificate_requests')
-    if (saved) {
-      const allRequests = JSON.parse(saved)
-      const found = allRequests.find(r => r.id === id)
+  const loadCertDetails = async () => {
+    try {
+      const response = await fetch('/api/certificates/officer', {
+        headers: getAuthHeaders()
+      })
+      if (!response.ok) throw new Error('Failed to load certificate requests.')
+      const data = await response.json()
+      const found = data.find(r => r.request_id === id)
       if (found) {
-        setCertRequest(found)
-        // Set checkboxes if already approved
-        if (found.status === 'Approved') {
+        const formatted = {
+          id: found.request_id,
+          type: found.certificate_type === 'INCOME' ? 'Income Certificate' : 'Residence Certificate',
+          status: found.status === 'PENDING' ? 'Pending' : found.status === 'APPROVED' ? 'Approved' : 'Rejected',
+          name: found.resident_name || 'Resident',
+          purpose: found.purpose,
+          submittedDate: found.request_date ? found.request_date.split('T')[0] : '',
+          division: found.division || 'Colombo',
+          nic: found.resident_nic,
+          address: found.resident_address || ''
+        }
+        setCertRequest(formatted)
+        
+        if (formatted.status === 'Approved') {
           setDocumentAuditCheck(true)
           setSignatureMatch(true)
           setBillsVerified(true)
-        } else if (found.status === 'Rejected') {
+        } else if (formatted.status === 'Rejected') {
           setDocumentAuditCheck(false)
           setSignatureMatch(false)
           setBillsVerified(false)
         }
       }
+    } catch (err) {
+      console.error(err)
     }
+  }
+
+  useEffect(() => {
+    loadCertDetails()
   }, [id])
 
   if (!certRequest) {
@@ -53,36 +74,54 @@ function OfficerCertificateDetails({ onOpenHelp }) {
     )
   }
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (!signatureMatch || !billsVerified) {
       const confirmApprove = window.confirm("You have not checked all Officer Quick Check items. Do you still want to approve this application?")
       if (!confirmApprove) return
     }
 
-    const saved = localStorage.getItem('smartgn_certificate_requests')
-    if (saved) {
-      const allRequests = JSON.parse(saved)
-      const updated = allRequests.map(r => r.id === id ? { ...r, status: 'Approved' } : r)
-      localStorage.setItem('smartgn_certificate_requests', JSON.stringify(updated))
-      setCertRequest({ ...certRequest, status: 'Approved' })
+    try {
+      const response = await fetch(`/api/certificates/${id}/action`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status: 'APPROVED' })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to approve certificate.')
+      }
+
+      setCertRequest(prev => prev ? { ...prev, status: 'Approved' } : null)
       setDocumentAuditCheck(true)
       alert(`Certificate request ${id} has been Approved and Issued successfully!`)
       navigate('/dashboard/officer/certificates', { state: { successUser, officerId: officerIdVal } })
+    } catch (err) {
+      alert(err.message || 'Error approving request.')
     }
   }
 
-  const handleReject = () => {
+  const handleReject = async () => {
     const reason = window.prompt("Please enter the reason for rejection:")
     if (reason === null) return // cancelled prompt
     
-    const saved = localStorage.getItem('smartgn_certificate_requests')
-    if (saved) {
-      const allRequests = JSON.parse(saved)
-      const updated = allRequests.map(r => r.id === id ? { ...r, status: 'Rejected', rejectionReason: reason || 'Incomplete supporting documents.' } : r)
-      localStorage.setItem('smartgn_certificate_requests', JSON.stringify(updated))
-      setCertRequest({ ...certRequest, status: 'Rejected' })
+    try {
+      const response = await fetch(`/api/certificates/${id}/action`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status: 'REJECTED', rejectionReason: reason || 'Incomplete supporting documents.' })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to reject certificate.')
+      }
+
+      setCertRequest(prev => prev ? { ...prev, status: 'Rejected' } : null)
       alert(`Certificate request ${id} has been Rejected.`)
       navigate('/dashboard/officer/certificates', { state: { successUser, officerId: officerIdVal } })
+    } catch (err) {
+      alert(err.message || 'Error rejecting request.')
     }
   }
 

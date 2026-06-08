@@ -93,6 +93,11 @@ CREATE TABLE IF NOT EXISTS disaster_request (
     request_date DATE NOT NULL,
     description TEXT NOT NULL,
     status VARCHAR(30) NOT NULL DEFAULT 'PENDING', -- 'PENDING', 'RELIEF_APPROVED', 'AID_DISPATCHED', 'RESOLVED'
+    severity VARCHAR(20) DEFAULT 'MEDIUM',
+    location VARCHAR(255) NOT NULL,
+    contact_number VARCHAR(15) NOT NULL,
+    aid_requested TEXT,
+    officer_remarks TEXT,
     resident_nic VARCHAR(12) NOT NULL,
     gn_id VARCHAR(36),
     admin_id VARCHAR(36),
@@ -115,6 +120,7 @@ CREATE TABLE IF NOT EXISTS allowance_application (
     cleared_amount DECIMAL(10,2) DEFAULT 0.00,
     cleared_time DATETIME,
     txn_reference VARCHAR(50),
+    bank_details TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (resident_nic) REFERENCES resident(r_nic) ON DELETE CASCADE,
     FOREIGN KEY (gn_id) REFERENCES grama_niladhari(gn_id) ON DELETE SET NULL
@@ -128,6 +134,7 @@ CREATE TABLE IF NOT EXISTS certificate_request (
     request_date DATE NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING', -- 'PENDING', 'APPROVED', 'REJECTED'
     rejection_reason VARCHAR(255),
+    action_date DATETIME,
     resident_nic VARCHAR(12) NOT NULL,
     gn_id VARCHAR(36),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -207,22 +214,22 @@ CREATE TABLE IF NOT EXISTS announcement (
 -- Seeding Initial Mock Data (matching mockup division Borella)
 -- ---------------------------------------------------------
 
-INSERT INTO gn_division (division_id, name, district, province) VALUES
+INSERT IGNORE INTO gn_division (division_id, name, district, province) VALUES
 ('DIV-BORELLA-01', 'Colombo, Borella', 'Colombo', 'Western');
 
-INSERT INTO household (household_number, address, division_id) VALUES
+INSERT IGNORE INTO household (household_number, address, division_id) VALUES
 ('H-90823', '45/2, Temple Road, Borella', 'DIV-BORELLA-01'),
 ('H-90824', '12, School Lane, Borella', 'DIV-BORELLA-01');
 
 -- Passwords hashed 'password123'
-INSERT INTO resident (r_nic, name, date_of_birth, password, gender, mobile_no, occupation, email, household_number) VALUES
-('789456123V', 'Nimal Perera', '1990-05-15', '$2b$10$wKTLgQ1m6n6kXW0Yq1Kj8e8FjK4XmB.B2yJv8t.x8.x8.x8.x8.x8', 'Male', '0771234567', 'Engineer', 'nimal@example.com', 'H-90823'),
-('897654321V', 'Kamala Silva', '1985-08-20', '$2b$10$wKTLgQ1m6n6kXW0Yq1Kj8e8FjK4XmB.B2yJv8t.x8.x8.x8.x8.x8', 'Female', '0719876543', 'Teacher', 'kamala@example.com', 'H-90824');
+INSERT IGNORE INTO resident (r_nic, name, date_of_birth, password, gender, mobile_no, occupation, email, household_number) VALUES
+('789456123V', 'Nimal Perera', '1990-05-15', '$2b$10$mKpQ9qw9yqJh0BJU1CKOTeMMIpLW3mnGP6g0YaemBcn6W.uHNcbIS', 'Male', '0771234567', 'Engineer', 'nimal@example.com', 'H-90823'),
+('897654321V', 'Kamala Silva', '1985-08-20', '$2b$10$mKpQ9qw9yqJh0BJU1CKOTeMMIpLW3mnGP6g0YaemBcn6W.uHNcbIS', 'Female', '0719876543', 'Teacher', 'kamala@example.com', 'H-90824');
 
 -- Passwords hashed 'password123'
-INSERT INTO grama_niladhari (gn_id, username, password, name, email, mobile, division_id) VALUES
-('GN-BORELLA', 'kamal_gn', '$2b$10$wKTLgQ1m6n6kXW0Yq1Kj8e8FjK4XmB.B2yJv8t.x8.x8.x8.x8.x8', 'Kamal Perera', 'kamal.gn@example.com', '0703564478', 'DIV-BORELLA-01');
+INSERT IGNORE INTO grama_niladhari (gn_id, username, password, name, email, mobile, division_id) VALUES
+('GN-BORELLA', 'kamal_gn', '$2b$10$mKpQ9qw9yqJh0BJU1CKOTeMMIpLW3mnGP6g0YaemBcn6W.uHNcbIS', 'Kamal Perera', 'kamal.gn@example.com', '0703564478', 'DIV-BORELLA-01');
 
 -- Passwords hashed 'admin123'
-INSERT INTO admin (admin_id, name, username, password, email) VALUES
-('ADMIN-01', 'System Administrator', 'admin', '$2b$10$tMhO2Lp1qA2K5Z9N1V2c3O4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t', 'admin@smartgn.gov.lk');
+INSERT IGNORE INTO admin (admin_id, name, username, password, email) VALUES
+('ADMIN-01', 'System Administrator', 'admin', '$2b$10$LWqQ3Eun7eJFjMsTieqoCOjqSaFryJx8mqDcNTLEZ60vX6feM7eR2', 'admin@smartgn.gov.lk');

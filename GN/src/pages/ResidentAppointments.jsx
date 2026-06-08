@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function ResidentAppointments({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -9,9 +10,9 @@ function ResidentAppointments({ onOpenHelp }) {
   const { lang } = useLanguage()
   const t = translations[lang]
 
-  // Retrieve username and division/ID from navigation state if available (defaults to Nimal Perera)
-  const successUser = location.state?.successUser || 'Nimal Perera'
-  const userDivision = location.state?.division || 'Colombo'
+  // Retrieve username and division/ID from navigation state or localStorage (defaults to Nimal Perera)
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Nimal Perera'
+  const userDivision = location.state?.division || localStorage.getItem('smartgn_user_division') || 'Colombo'
   const firstName = successUser.split(' ')[0]
 
   // Booking states
@@ -27,90 +28,44 @@ function ResidentAppointments({ onOpenHelp }) {
   const [contactNumber, setContactNumber] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
-  // Load appointments from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('smartgn_appointments')
-    if (saved) {
-      setAppointments(JSON.parse(saved))
-    } else {
-      // Seed default appointments matching the counts: 5 Pending, 3 Approved
-      const defaultAppointments = [
-        {
-          id: 1,
-          purpose: 'Certificate Collection',
-          date: 'Thursday, 15 May 2026',
-          day: 15,
-          time: '2:00 PM',
-          officer: 'Kamal Silva',
-          status: 'Approved'
-        },
-        {
-          id: 2,
-          purpose: 'Address Verification',
-          date: 'Friday, 08 May 2026',
-          day: 8,
-          time: '11:00 AM',
-          officer: 'Kamala Silva',
-          status: 'Approved'
-        },
-        {
-          id: 3,
-          purpose: 'Land Valuation Report',
-          date: 'Friday, 22 May 2026',
-          day: 22,
-          time: '3:00 PM',
-          officer: 'Nimal Perera',
-          status: 'Approved'
-        },
-        {
-          id: 4,
-          purpose: 'Allowance Inquiry',
-          date: 'Saturday, 16 May 2026',
-          day: 16,
-          time: '10:30 AM',
-          officer: 'Kamal Silva',
-          status: 'Pending'
-        },
-        {
-          id: 5,
-          purpose: 'General Inquiry',
-          date: 'Wednesday, 06 May 2026',
-          day: 6,
-          time: '9:00 AM',
-          officer: 'Kamala Perera',
-          status: 'Pending'
-        },
-        {
-          id: 6,
-          purpose: 'Income Certificate Verification',
-          date: 'Tuesday, 12 May 2026',
-          day: 12,
-          time: '1:30 PM',
-          officer: 'Kamal Silva',
-          status: 'Pending'
-        },
-        {
-          id: 7,
-          purpose: 'Signature Certification',
-          date: 'Wednesday, 20 May 2026',
-          day: 20,
-          time: '11:30 AM',
-          officer: 'Kamala Silva',
-          status: 'Pending'
-        },
-        {
-          id: 8,
-          purpose: 'Identity Certification',
-          date: 'Thursday, 28 May 2026',
-          day: 28,
-          time: '2:30 PM',
-          officer: 'Kamal Silva',
-          status: 'Pending'
+  const loadAppointments = async () => {
+    try {
+      const response = await fetch('/api/appointments/resident', {
+        headers: getAuthHeaders()
+      })
+      if (!response.ok) throw new Error('Failed to load appointments.')
+      const data = await response.json()
+      const formatted = data.map(item => {
+        // Parse day from SQL date (e.g. '2026-05-15')
+        const parts = item.date.split('-')
+        const dayVal = parts.length === 3 ? parseInt(parts[2]) : 15
+        
+        // Format date string for display
+        const dateObj = new Date(item.date)
+        const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        const formattedDate = `${weekdays[dateObj.getDay()] || 'Thursday'}, ${dayVal < 10 ? '0' + dayVal : dayVal} ${months[dateObj.getMonth()] || 'May'} ${dateObj.getFullYear() || '2026'}`
+
+        return {
+          id: item.appointment_id,
+          purpose: item.purpose,
+          date: formattedDate,
+          day: dayVal,
+          time: item.time,
+          officer: item.officer_name || 'Kamal Silva',
+          status: item.status === 'PENDING' ? 'Pending' : item.status === 'CONFIRMED' ? 'Approved' : 'Declined'
         }
-      ]
-      localStorage.setItem('smartgn_appointments', JSON.stringify(defaultAppointments))
-      setAppointments(defaultAppointments)
+      })
+      setAppointments(formatted)
+    } catch (err) {
+      console.error(err)
+      const saved = localStorage.getItem('smartgn_appointments')
+      if (saved) setAppointments(JSON.parse(saved))
     }
+  }
+
+  useEffect(() => {
+    loadAppointments()
   }, [])
 
   // Calculate dynamic stats
@@ -122,17 +77,11 @@ function ResidentAppointments({ onOpenHelp }) {
 
   // Handle Cancel Appointment
   const handleCancelAppointment = (id) => {
-    const confirmCancel = window.confirm('Are you sure you want to cancel this appointment?')
-    if (confirmCancel) {
-      const updated = appointments.filter(item => item.id !== id)
-      localStorage.setItem('smartgn_appointments', JSON.stringify(updated))
-      setAppointments(updated)
-      alert('Appointment cancelled successfully.')
-    }
+    alert('Appointment cancellation requested. Please contact your Grama Niladhari division officer.')
   }
 
   // Handle Book New Appointment
-  const handleCreateBooking = (e) => {
+  const handleCreateBooking = async (e) => {
     e.preventDefault()
 
     if (!contactNumber) {
@@ -142,33 +91,32 @@ function ResidentAppointments({ onOpenHelp }) {
 
     setErrorMessage('')
 
-    // Date construction
-    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    const dateObj = new Date(2026, 4, bookDay) // May 2026
-    const dayOfWeek = weekdays[dateObj.getDay()]
-    const formattedDate = `${dayOfWeek}, ${bookDay < 10 ? '0' + bookDay : bookDay} May 2026`
+    try {
+      const dateString = `2026-05-${String(bookDay).padStart(2, '0')}`
 
-    const nextId = appointments.length > 0 ? Math.max(...appointments.map(a => a.id)) + 1 : 1
+      const response = await fetch('/api/appointments/book', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          date: dateString,
+          time: bookTime,
+          purpose: purpose
+        })
+      })
 
-    const newBooking = {
-      id: nextId,
-      purpose: purpose,
-      date: formattedDate,
-      day: parseInt(bookDay),
-      time: bookTime,
-      officer: officerName,
-      status: 'Pending'
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to book appointment.')
+      }
+
+      setSelectedDay(parseInt(bookDay))
+      setIsBookingMode(false)
+      setContactNumber('')
+      loadAppointments()
+      alert('Appointment requested successfully! Pending Grama Niladhari review.')
+    } catch (err) {
+      setErrorMessage(err.message || 'Error booking appointment.')
     }
-
-    const updated = [...appointments, newBooking]
-    localStorage.setItem('smartgn_appointments', JSON.stringify(updated))
-    setAppointments(updated)
-    
-    // Select the newly booked day
-    setSelectedDay(parseInt(bookDay))
-    setIsBookingMode(false)
-    setContactNumber('')
-    alert('Appointment requested successfully! Pending Grama Niladhari review.')
   }
 
   // Calendar cells generation for May 2026

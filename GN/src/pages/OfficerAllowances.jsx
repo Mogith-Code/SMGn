@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function OfficerAllowances({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -10,8 +11,8 @@ function OfficerAllowances({ onOpenHelp }) {
   const t = translations[lang]
 
   // Session user defaults
-  const successUser = location.state?.successUser || 'Kamal Perera'
-  const officerIdVal = location.state?.officerId || '200324511540'
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Kamal Perera'
+  const officerIdVal = location.state?.officerId || localStorage.getItem('smartgn_user_id') || '200324511540'
 
   // States
   const [requests, setRequests] = useState([])
@@ -30,128 +31,92 @@ function OfficerAllowances({ onOpenHelp }) {
   const [showReceiptId, setShowReceiptId] = useState(null)
   const [receiptRequest, setReceiptRequest] = useState(null)
 
-  useEffect(() => {
-    const saved = localStorage.getItem('smartgn_allowance_requests')
-    if (saved) {
-      setRequests(JSON.parse(saved))
-    } else {
-      // Seed default requests matching resident allowances
-      const defaultRequests = [
-        {
-          id: 1,
-          program: 'Disability Allowance',
-          purpose: 'For certify residence',
-          status: 'Approved',
-          bankDetails: {
-            bankName: 'Bank of Ceylon',
-            branch: 'Colombo 03',
-            accountNumber: '8956321475',
-            accountHolderName: 'Nimal Perera'
-          },
-          paymentStatus: 'Paid',
-          paymentAmount: 5000,
-          paymentTransferredAt: '2026-05-28 10:45 AM',
-          paymentTransactionRef: 'TXN-859203859',
-          applicantName: 'Nimal Perera',
-          nic: '200324511540',
-          income: '15000',
-          submittedDate: '2024-04-01'
-        },
-        {
-          id: 2,
-          program: 'Aswesuma',
-          purpose: 'For income verification',
-          status: 'Pending',
-          bankDetails: {
-            bankName: 'Commercial Bank',
-            branch: 'Maharagama',
-            accountNumber: '1023456789',
-            accountHolderName: 'Kamala Silva'
-          },
-          paymentStatus: 'Unpaid',
-          applicantName: 'Kamala Silva',
-          nic: '789456123V',
-          income: '18000',
-          submittedDate: '2024-03-28'
-        },
-        {
-          id: 3,
-          program: 'Samurdhi',
-          purpose: 'For certify residence',
-          status: 'Rejected',
-          bankDetails: {
-            bankName: 'People\'s Bank',
-            branch: 'Colombo 10',
-            accountNumber: '2019485760',
-            accountHolderName: 'Nimal Perera'
-          },
-          paymentStatus: 'Unpaid',
-          applicantName: 'Nimal Perera',
-          nic: '200324511540',
-          income: '22000',
-          submittedDate: '2024-03-27'
-        },
-        {
-          id: 4,
-          program: 'Elderly Support',
-          purpose: 'For income verification',
-          status: 'Pending',
-          bankDetails: {
-            bankName: 'Sampath Bank',
-            branch: 'Borella',
-            accountNumber: '4019283745',
-            accountHolderName: 'Kamala Silva'
-          },
-          paymentStatus: 'Unpaid',
-          applicantName: 'Kamala Silva',
-          nic: '789456123V',
-          income: '12000',
-          submittedDate: '2024-03-26'
-        },
-        {
-          id: 5,
-          program: 'Kidney Disease Support',
-          purpose: 'For certify residence',
-          status: 'Approved',
-          bankDetails: {
-            bankName: 'Bank of Ceylon',
-            branch: 'Colombo 03',
-            accountNumber: '8956321475',
-            accountHolderName: 'Nimal Perera'
-          },
-          paymentStatus: 'Paid',
-          paymentAmount: 7500,
-          paymentTransferredAt: '2026-05-29 02:15 PM',
-          paymentTransactionRef: 'TXN-902847120',
-          applicantName: 'Nimal Perera',
-          nic: '200324511540',
-          income: '24000',
-          submittedDate: '2024-03-25'
+  const loadRequests = async () => {
+    try {
+      const response = await fetch('/api/allowances/officer', {
+        headers: getAuthHeaders()
+      })
+      if (!response.ok) throw new Error('Failed to load allowance requests queue.')
+      const data = await response.json()
+      const formatted = data.map(item => {
+        let bankDetailsObj = null;
+        try {
+          bankDetailsObj = typeof item.bank_details === 'string' ? JSON.parse(item.bank_details) : item.bank_details;
+        } catch (e) {
+          bankDetailsObj = item.bank_details;
         }
-      ]
-      localStorage.setItem('smartgn_allowance_requests', JSON.stringify(defaultRequests))
-      setRequests(defaultRequests)
+        return {
+          id: item.allowance_id,
+          program: item.allowance_type,
+          purpose: item.income_details ? item.income_details.substring(0, 100) : '',
+          status: item.status === 'PENDING' ? 'Pending' : item.status === 'APPROVED' ? 'Approved' : 'Rejected',
+          bankDetails: bankDetailsObj,
+          paymentStatus: item.payment_status === 'PAID' ? 'Paid' : 'Unpaid',
+          paymentAmount: item.cleared_amount,
+          paymentTransferredAt: item.cleared_time ? new Date(item.cleared_time).toLocaleString() : '',
+          paymentTransactionRef: item.txn_reference,
+          applicantName: item.resident_name || 'Resident',
+          nic: item.resident_nic,
+          income: item.income_details || '',
+          submittedDate: item.application_date ? new Date(item.application_date).toISOString().split('T')[0] : '2026-05-15'
+        }
+      })
+      setRequests(formatted)
+    } catch (err) {
+      console.error(err)
+      const saved = localStorage.getItem('smartgn_allowance_requests')
+      if (saved) setRequests(JSON.parse(saved))
     }
+  }
+
+  useEffect(() => {
+    loadRequests()
   }, [])
 
   // Approve action
-  const handleApprove = (id, e) => {
+  const handleApprove = async (id, e) => {
     e.stopPropagation()
-    const updated = requests.map(r => r.id === id ? { ...r, status: 'Approved' } : r)
-    localStorage.setItem('smartgn_allowance_requests', JSON.stringify(updated))
-    setRequests(updated)
-    alert(`Allowance request SmartGN-AL-${id} has been Approved.`)
+    try {
+      const response = await fetch(`/api/allowances/${id}/status`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status: 'APPROVED' })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to approve allowance request.')
+      }
+
+      alert(`Allowance request ${id} has been Approved.`)
+      loadRequests()
+    } catch (err) {
+      alert(err.message || 'Error approving allowance request.')
+    }
   }
 
   // Reject action
-  const handleReject = (id, e) => {
+  const handleReject = async (id, e) => {
     e.stopPropagation()
     const confirmReject = window.confirm("Are you sure you want to reject this allowance request?")
     if (confirmReject) {
-      const updated = requests.map(r => r.id === id ? { ...r, status: 'Rejected' } : r)
-      localStorage.setItem('smartgn_allowance_requests', JSON.stringify(updated))
-      setRequests(updated)
-      alert(`Allowance request SmartGN-AL-${id} has been Rejected.`)
+      try {
+        const response = await fetch(`/api/allowances/${id}/status`, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ status: 'REJECTED' })
+        })
+
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || 'Failed to reject allowance request.')
+        }
+
+        alert(`Allowance request ${id} has been Rejected.`)
+        loadRequests()
+      } catch (err) {
+        alert(err.message || 'Error rejecting allowance request.')
+      }
     }
   }
 
@@ -183,28 +148,45 @@ function OfficerAllowances({ onOpenHelp }) {
       setTimeout(() => {
         setTransferStep(3) // Completed
 
-        setTimeout(() => {
-          // Commit to state & localStorage
-          const nowStr = new Date().toLocaleString()
-          const txnRef = `TXN-${Math.floor(100000000 + Math.random() * 900000000)}`
-          
-          const updated = requests.map(r => r.id === id ? { 
-            ...r, 
-            paymentStatus: 'Paid',
-            paymentAmount: parseFloat(transferAmount),
-            paymentTransferredAt: nowStr,
-            paymentTransactionRef: txnRef
-          } : r)
-          
-          localStorage.setItem('smartgn_allowance_requests', JSON.stringify(updated))
-          setRequests(updated)
-          setTransferringId(null)
-          setTransferStep(0)
-          
-          // Re-verify and open the secure receipt modal automatically!
-          const completedItem = updated.find(r => r.id === id)
-          setReceiptRequest(completedItem)
-          setShowReceiptId(id)
+        setTimeout(async () => {
+          try {
+            const response = await fetch(`/api/allowances/${id}/disburse`, {
+              method: 'POST',
+              headers: getAuthHeaders(),
+              body: JSON.stringify({
+                disburseAmount: parseFloat(transferAmount)
+              })
+            })
+
+            if (!response.ok) {
+              const data = await response.json()
+              throw new Error(data.error || 'Failed to disburse funds.')
+            }
+
+            const resData = await response.json()
+            await loadRequests()
+            setTransferringId(null)
+            setTransferStep(0)
+            alert('RTGS Secure Funds Disbursed successfully.')
+
+            const completedItem = {
+              id: id,
+              program: item.program,
+              status: 'Approved',
+              paymentStatus: 'Paid',
+              paymentAmount: resData.transaction.amount,
+              paymentTransferredAt: new Date(resData.transaction.timestamp).toLocaleString(),
+              paymentTransactionRef: resData.transaction.txnRef,
+              applicantName: item.applicantName,
+              bankDetails: item.bankDetails
+            }
+            setReceiptRequest(completedItem)
+            setShowReceiptId(id)
+          } catch (err) {
+            alert(err.message || 'Error disbursing allowance funds.')
+            setTransferringId(null)
+            setTransferStep(0)
+          }
         }, 800)
       }, 1000)
     }, 800)

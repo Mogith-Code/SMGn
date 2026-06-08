@@ -1,16 +1,30 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 
 const router = express.Router();
 
-// Middleware helper to mock verify token roles (simplified for demonstration, will integrate with real client headers)
+// Middleware helper to verify token roles dynamically
 const authUser = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: 'Authorization header required.' });
-  // In dynamic mode, decode JWT. For mock frontend verification we extract custom headers
-  req.user = { id: req.headers['x-user-id'] || '789456123V', role: req.headers['x-user-role'] || 'RESIDENT' };
-  next();
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    req.user = { id: decoded.id, role: decoded.role, name: decoded.name };
+    next();
+  } catch (err) {
+    // Fallback/backwards compatibility with custom headers
+    const userId = req.headers['x-user-id'];
+    const userRole = req.headers['x-user-role'];
+    if (userId && userRole) {
+      req.user = { id: userId, role: userRole };
+      return next();
+    }
+    return res.status(401).json({ error: 'Invalid or expired authorization token.' });
+  }
 };
 
 // 1. Submit Certificate Request (Resident)

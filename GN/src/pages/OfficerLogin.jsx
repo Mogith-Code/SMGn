@@ -45,11 +45,14 @@ function OfficerLogin() {
       localStorage.setItem('smartgn_token', data.token)
       localStorage.setItem('smartgn_user_role', 'OFFICER')
       localStorage.setItem('smartgn_user_id', data.user.id)
+      localStorage.setItem('smartgn_user_division', data.user.divisionName || 'Colombo, Borella')
+      localStorage.setItem('smartgn_user_name', data.user.name)
 
       navigate('/dashboard/officer', { 
         state: { 
           successUser: data.user.name, 
-          officerId: data.user.id 
+          officerId: data.user.id,
+          division: data.user.divisionName || 'Colombo, Borella'
         } 
       })
     } catch (err) {

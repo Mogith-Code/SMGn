@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { getAuthHeaders } from '../utils/api'
 
 function OfficerCertificates({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -10,8 +11,8 @@ function OfficerCertificates({ onOpenHelp }) {
   const t = translations[lang]
 
   // Session user defaults
-  const successUser = location.state?.successUser || 'Kamal Perera'
-  const officerIdVal = location.state?.officerId || '200324511540'
+  const successUser = location.state?.successUser || localStorage.getItem('smartgn_user_name') || 'Kamal Perera'
+  const officerIdVal = location.state?.officerId || localStorage.getItem('smartgn_user_id') || 'GN-BORELLA'
   const initialFilter = location.state?.activeFilter || 'All'
 
   // Certificates list state
@@ -20,116 +21,77 @@ function OfficerCertificates({ onOpenHelp }) {
   const [filterStatus, setFilterStatus] = useState(initialFilter) // 'All' | 'Pending' | 'Approved' | 'Rejected'
   const [visibleCount, setVisibleCount] = useState(3) // Seed has 3 items initially, Load More loads more mock items
 
-  useEffect(() => {
-    const saved = localStorage.getItem('smartgn_certificate_requests')
-    if (saved) {
-      setCerts(JSON.parse(saved))
-    } else {
-      // Mock initial data exactly matching the mockup screenshot
-      const defaultCerts = [
-        {
-          id: 'GN-RES-2024-0012',
-          type: 'Residence Certificate',
-          status: 'Pending',
-          name: 'Nimal Perera',
-          purpose: 'Bank loan',
-          submittedDate: '2024-04-01',
-          division: 'Colombo 03',
-          nic: '200324511540',
-          address: '78/1, Flower Road, Colombo 03.',
-          verificationChecklist: { address: true, nic: true, statusText: 'Pending document audit' },
-          quickCheck: { signature: false, bills: false },
-          history: [
-            { type: 'Character Cert', date: 'Sept 2023', status: 'Issued', ref: '#4412' }
-          ],
-          documents: [
-            { name: 'Proof of Residence', size: '1.2MB', format: 'PDF', note: 'Utility Bill - March 2024' }
-          ]
-        },
-        {
-          id: 'GN-INC-2024-8842',
-          type: 'Income Certificate',
-          status: 'Pending',
-          name: 'Kamala Silva',
-          purpose: 'School admission',
-          submittedDate: '2024-03-28',
-          division: 'Maharagama',
-          nic: '789456123V',
-          address: '45/2, Temple Road, Maharagama.',
-          verificationChecklist: { address: true, nic: true, statusText: 'Requires document audit' },
-          quickCheck: { signature: false, bills: false },
-          history: [
-            { type: 'Residence Cert', date: 'Sept 2023', status: 'Issued', ref: '#4412' }
-          ],
-          documents: [
-            { name: 'Proof of Residence', size: '1.2MB', format: 'PDF', note: 'Utility Bill - March 2024' },
-            { name: 'Income Declaration Form', size: '2.5MB', format: 'JPG', note: 'Signed & Notarized' }
-          ]
-        },
-        {
-          id: 'GN-CHA-2024-5123',
-          type: 'Character Certificate',
-          status: 'Pending',
-          name: 'Saman Fernando',
-          purpose: 'Job application',
-          submittedDate: '2024-03-25',
-          division: 'Kaduwela',
-          nic: '887654321V',
-          address: '12, Temple Road, Kaduwela.',
-          verificationChecklist: { address: true, nic: false, statusText: 'DRP API matching required' },
-          quickCheck: { signature: false, bills: false },
-          history: [],
-          documents: [
-            { name: 'Police Clearance Certificate', size: '3.1MB', format: 'PDF', note: 'Issued March 2024' }
-          ]
-        },
-        // Extra seed items for dynamic "Load More" functionality
-        {
-          id: 'GN-RES-2024-0091',
-          type: 'Residence Certificate',
-          status: 'Approved',
-          name: 'Priyantha Bandara',
-          purpose: 'Foreign Visa',
-          submittedDate: '2024-03-12',
-          division: 'Colombo 03',
-          nic: '741258963V',
-          address: '14, Green Lane, Colombo 03.'
-        },
-        {
-          id: 'GN-INC-2024-0010',
-          type: 'Income Certificate',
-          status: 'Rejected',
-          name: 'Ranil Perera',
-          purpose: 'Housing Loan',
-          submittedDate: '2024-03-05',
-          division: 'Maharagama',
-          nic: '652398741V',
-          address: '122/A, Highlevel Road, Maharagama.'
-        }
-      ]
-      localStorage.setItem('smartgn_certificate_requests', JSON.stringify(defaultCerts))
-      setCerts(defaultCerts)
+  const loadCerts = async () => {
+    try {
+      const response = await fetch('/api/certificates/officer', {
+        headers: getAuthHeaders()
+      })
+      if (!response.ok) throw new Error('Failed to load certificates.')
+      const data = await response.json()
+      
+      const formatted = data.map(item => ({
+        id: item.request_id,
+        type: item.certificate_type === 'INCOME' ? 'Income Certificate' : 'Residence Certificate',
+        status: item.status === 'PENDING' ? 'Pending' : item.status === 'APPROVED' ? 'Approved' : 'Rejected',
+        name: item.resident_name || 'Resident',
+        purpose: item.purpose,
+        submittedDate: item.request_date ? item.request_date.split('T')[0] : '',
+        division: item.division || 'Colombo',
+        nic: item.resident_nic,
+        address: item.resident_address || ''
+      }))
+      setCerts(formatted)
+    } catch (err) {
+      console.error(err)
+      const saved = localStorage.getItem('smartgn_certificate_requests')
+      if (saved) setCerts(JSON.parse(saved))
     }
+  }
+
+  useEffect(() => {
+    loadCerts()
   }, [])
 
   // Approve action directly from list
-  const handleApprove = (id, e) => {
-    e.stopPropagation() // Prevent navigating to details
-    const updated = certs.map(c => c.id === id ? { ...c, status: 'Approved' } : c)
-    localStorage.setItem('smartgn_certificate_requests', JSON.stringify(updated))
-    setCerts(updated)
-    alert(`Certificate request ${id} approved successfully.`)
+  const handleApprove = async (id, e) => {
+    e.stopPropagation()
+    try {
+      const response = await fetch(`/api/certificates/${id}/action`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status: 'APPROVED' })
+      })
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to approve certificate.')
+      }
+      alert(`Certificate request ${id} approved successfully.`)
+      loadCerts()
+    } catch (err) {
+      alert(err.message || 'Error approving request.')
+    }
   }
 
   // Reject action directly from list
-  const handleReject = (id, e) => {
-    e.stopPropagation() // Prevent navigating to details
-    const confirmReject = window.confirm(`Are you sure you want to reject the certificate request ${id}?`)
-    if (confirmReject) {
-      const updated = certs.map(c => c.id === id ? { ...c, status: 'Rejected' } : c)
-      localStorage.setItem('smartgn_certificate_requests', JSON.stringify(updated))
-      setCerts(updated)
-      alert(`Certificate request ${id} has been rejected.`)
+  const handleReject = async (id, e) => {
+    e.stopPropagation()
+    const reason = window.prompt(`Enter rejection reason for certificate request ${id}:`)
+    if (reason !== null) {
+      try {
+        const response = await fetch(`/api/certificates/${id}/action`, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ status: 'REJECTED', rejectionReason: reason })
+        })
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || 'Failed to reject certificate.')
+        }
+        alert(`Certificate request ${id} has been rejected.`)
+        loadCerts()
+      } catch (err) {
+        alert(err.message || 'Error rejecting request.')
+      }
     }
   }
 
