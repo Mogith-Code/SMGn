@@ -2,9 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 import LandingPage from './pages/LandingPage'
-import RoleSelection from './pages/RoleSelection'
-import ResidentLogin from './pages/ResidentLogin'
-import OfficerLogin from './pages/OfficerLogin'
+import Login from './pages/Login'
 import Register from './pages/Register'
 import Success from './pages/Success'
 import ResidentDashboard from './pages/ResidentDashboard'
@@ -28,7 +26,6 @@ import OfficerHouseholdDetails from './pages/OfficerHouseholdDetails'
 import OfficerCertificates from './pages/OfficerCertificates'
 import OfficerCertificateDetails from './pages/OfficerCertificateDetails'
 import OfficerAllowances from './pages/OfficerAllowances'
-import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import Chatbot from './components/Chatbot'
 
@@ -127,10 +124,7 @@ function App() {
               <div className="portal-container">
                 <div className="portal-card">
                   <Routes>
-                    <Route path="/login" element={<RoleSelection />} />
-                    <Route path="/login/resident" element={<ResidentLogin />} />
-                    <Route path="/login/officer" element={<OfficerLogin />} />
-                    <Route path="/login/admin" element={<AdminLogin />} />
+                    <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/success" element={<Success />} />
                     {/* Catch-all redirects back to public landing page */}

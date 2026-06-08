@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS resident (
     occupation VARCHAR(100),
     email VARCHAR(255) NOT NULL UNIQUE,
     household_number VARCHAR(36) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'Active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (household_number) REFERENCES household(household_number) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -58,6 +59,7 @@ CREATE TABLE IF NOT EXISTS grama_niladhari (
     email VARCHAR(255) NOT NULL UNIQUE,
     mobile VARCHAR(15) NOT NULL,
     division_id VARCHAR(36) UNIQUE,
+    status VARCHAR(20) NOT NULL DEFAULT 'Active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (division_id) REFERENCES gn_division(division_id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

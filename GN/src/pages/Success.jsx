@@ -24,7 +24,7 @@ function Success() {
         </strong>
       </p>
       <button 
-        onClick={() => navigate(isRegister ? '/login/resident' : '/')} 
+        onClick={() => navigate(isRegister ? '/login' : '/')} 
         className="btn-submit" 
         style={{ maxWidth: '200px', margin: '0 auto' }}
       >

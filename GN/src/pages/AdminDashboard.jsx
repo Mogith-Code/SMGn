@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
+import { authenticatedFetch } from '../utils/api'
 
 function AdminDashboard({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -125,86 +126,200 @@ function AdminDashboard({ onOpenHelp }) {
   // Tabs state: 'overview' | 'officers' | 'residents' | 'troubleshoot'
   const [activeTab, setActiveTab] = useState('overview')
 
-  // LocalStorage statuses states
-  const [officerStatuses, setOfficerStatuses] = useState({})
-  const [residentStatuses, setResidentStatuses] = useState({})
+  // DB list states
+  const [officers, setOfficers] = useState([])
+  const [residents, setResidents] = useState([])
+
+  // Modal display states
+  const [showAddOfficerModal, setShowAddOfficerModal] = useState(false)
+  const [showEditOfficerModal, setShowEditOfficerModal] = useState(false)
+  const [showEditResidentModal, setShowEditResidentModal] = useState(false)
+
+  // Form states
+  const [newOfficer, setNewOfficer] = useState({
+    username: '', name: '', email: '', mobile: '', division: '', password: ''
+  })
+  const [editOfficer, setEditOfficer] = useState({
+    id: '', username: '', name: '', email: '', mobile: '', division: '', status: 'Active'
+  })
+  const [editResident, setEditResident] = useState({
+    nic: '', name: '', email: '', mobile_no: '', status: 'Active', occupation: '', household_number: ''
+  })
 
   // Diagnostic states
   const [runningDiagnostic, setRunningDiagnostic] = useState(false)
   const [diagnosticProgress, setDiagnosticProgress] = useState(0)
   const [diagnosticLogs, setDiagnosticLogs] = useState([])
 
-  useEffect(() => {
-    // Seed and load officers statuses
-    const savedOfficers = localStorage.getItem('smartgn_officers_profiles_status')
-    if (savedOfficers) {
-      setOfficerStatuses(JSON.parse(savedOfficers))
-    } else {
-      const defaultOfficers = {
-        '200324511540': 'Active', // Kamal Perera
-        'Sunil Silva ID': 'Active', // Sunil Silva
-        'Kamal Perera': 'Active',
-        'Sunil Silva': 'Active'
+  const loadOfficers = async () => {
+    try {
+      const res = await authenticatedFetch('/api/auth/admin/officers')
+      if (res.ok) {
+        const data = await res.json()
+        setOfficers(data)
       }
-      localStorage.setItem('smartgn_officers_profiles_status', JSON.stringify(defaultOfficers))
-      setOfficerStatuses(defaultOfficers)
+    } catch (err) {
+      console.error('Error fetching officers:', err)
     }
+  }
 
-    // Seed and load residents statuses
-    const savedResidents = localStorage.getItem('smartgn_residents_profiles_status')
-    if (savedResidents) {
-      setResidentStatuses(JSON.parse(savedResidents))
-    } else {
-      const defaultResidents = {
-        '200324511540': 'Active', // Nimal Perera
-        '789456123V': 'Active',   // Kamala Silva
-        'Nimal Perera': 'Active',
-        'Kamala Silva': 'Active'
+  const loadResidents = async () => {
+    try {
+      const res = await authenticatedFetch('/api/auth/admin/residents')
+      if (res.ok) {
+        const data = await res.json()
+        setResidents(data)
       }
-      localStorage.setItem('smartgn_residents_profiles_status', JSON.stringify(defaultResidents))
-      setResidentStatuses(defaultResidents)
+    } catch (err) {
+      console.error('Error fetching residents:', err)
     }
+  }
+
+  useEffect(() => {
+    loadOfficers()
+    loadResidents()
   }, [])
 
   // Toggle Officer status
-  const toggleOfficerStatus = (id, currentStatus) => {
+  const toggleOfficerStatus = async (id, currentStatus) => {
     const nextStatus = currentStatus === 'Active' ? 'Suspended' : 'Active'
-    
-    // Determine the name to keep both in sync in mock logins
-    const nameMap = {
-      '200324511540': 'Kamal Perera',
-      'Sunil Silva ID': 'Sunil Silva'
+    try {
+      const res = await authenticatedFetch(`/api/auth/admin/officers/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: nextStatus })
+      })
+      if (res.ok) {
+        alert(`Grama Niladhari Officer has been successfully ${nextStatus === 'Active' ? 'Activated' : 'Deactivated & Suspended'}.`)
+        loadOfficers()
+      } else {
+        const err = await res.json()
+        alert(err.error || 'Failed to update officer status.')
+      }
+    } catch (error) {
+      alert('Error updating officer status.')
     }
-    const name = nameMap[id]
-
-    const updated = { ...officerStatuses, [id]: nextStatus }
-    if (name) {
-      updated[name] = nextStatus
-    }
-
-    localStorage.setItem('smartgn_officers_profiles_status', JSON.stringify(updated))
-    setOfficerStatuses(updated)
-    alert(`Grama Niladhari Officer (${name || id}) has been successfully ${nextStatus === 'Active' ? 'Activated' : 'Deactivated & Suspended'}.`)
   }
 
   // Toggle Resident status
-  const toggleResidentStatus = (id, currentStatus) => {
+  const toggleResidentStatus = async (nic, currentStatus) => {
     const nextStatus = currentStatus === 'Active' ? 'Suspended' : 'Active'
-
-    const nameMap = {
-      '200324511540': 'Nimal Perera',
-      '789456123V': 'Kamala Silva'
+    try {
+      const res = await authenticatedFetch(`/api/auth/admin/residents/${nic}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: nextStatus })
+      })
+      if (res.ok) {
+        alert(`Resident profile has been successfully ${nextStatus === 'Active' ? 'Activated' : 'Deactivated & Suspended'}.`)
+        loadResidents()
+      } else {
+        const err = await res.json()
+        alert(err.error || 'Failed to update resident status.')
+      }
+    } catch (error) {
+      alert('Error updating resident status.')
     }
-    const name = nameMap[id]
+  }
 
-    const updated = { ...residentStatuses, [id]: nextStatus }
-    if (name) {
-      updated[name] = nextStatus
+  // Delete GN Officer
+  const handleDeleteOfficer = async (id) => {
+    if (!window.confirm('Are you sure you want to permanently delete this GN Officer account? This action cannot be undone.')) return
+    try {
+      const res = await authenticatedFetch(`/api/auth/admin/officers/${id}`, {
+        method: 'DELETE'
+      })
+      if (res.ok) {
+        alert('GN Officer account deleted successfully.')
+        loadOfficers()
+      } else {
+        const err = await res.json()
+        alert(err.error || 'Failed to delete GN Officer account.')
+      }
+    } catch (error) {
+      alert('Error deleting GN Officer account.')
     }
+  }
 
-    localStorage.setItem('smartgn_residents_profiles_status', JSON.stringify(updated))
-    setResidentStatuses(updated)
-    alert(`Resident profile (${name || id}) has been successfully ${nextStatus === 'Active' ? 'Activated' : 'Deactivated & Suspended'}.`)
+  // Delete Resident
+  const handleDeleteResident = async (nic) => {
+    if (!window.confirm('Are you sure you want to permanently delete this Resident account? This action cannot be undone.')) return
+    try {
+      const res = await authenticatedFetch(`/api/auth/admin/residents/${nic}`, {
+        method: 'DELETE'
+      })
+      if (res.ok) {
+        alert('Resident account deleted successfully.')
+        loadResidents()
+      } else {
+        const err = await res.json()
+        alert(err.error || 'Failed to delete Resident account.')
+      }
+    } catch (error) {
+      alert('Error deleting Resident account.')
+    }
+  }
+
+  // Create GN Officer
+  const handleCreateOfficer = async (e) => {
+    e.preventDefault()
+    try {
+      const res = await authenticatedFetch('/api/auth/register/officer', {
+        method: 'POST',
+        body: JSON.stringify(newOfficer)
+      })
+      if (res.ok) {
+        alert('GN Officer account registered successfully.')
+        setShowAddOfficerModal(false)
+        setNewOfficer({ username: '', name: '', email: '', mobile: '', division: '', password: '' })
+        loadOfficers()
+      } else {
+        const err = await res.json()
+        alert(err.error || 'Failed to register GN Officer.')
+      }
+    } catch (error) {
+      alert('Error registering GN Officer.')
+    }
+  }
+
+  // Update GN Officer Details
+  const handleUpdateOfficer = async (e) => {
+    e.preventDefault()
+    try {
+      const res = await authenticatedFetch(`/api/auth/admin/officers/${editOfficer.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(editOfficer)
+      })
+      if (res.ok) {
+        alert('GN Officer updated successfully.')
+        setShowEditOfficerModal(false)
+        loadOfficers()
+      } else {
+        const err = await res.json()
+        alert(err.error || 'Failed to update GN Officer details.')
+      }
+    } catch (error) {
+      alert('Error updating GN Officer details.')
+    }
+  }
+
+  // Update Resident Details
+  const handleUpdateResident = async (e) => {
+    e.preventDefault()
+    try {
+      const res = await authenticatedFetch(`/api/auth/admin/residents/${editResident.nic}`, {
+        method: 'PUT',
+        body: JSON.stringify(editResident)
+      })
+      if (res.ok) {
+        alert('Resident updated successfully.')
+        setShowEditResidentModal(false)
+        loadResidents()
+      } else {
+        const err = await res.json()
+        alert(err.error || 'Failed to update Resident details.')
+      }
+    } catch (error) {
+      alert('Error updating Resident details.')
+    }
   }
 
   // Troubleshooter Diagnostic simulation
@@ -366,9 +481,27 @@ function AdminDashboard({ onOpenHelp }) {
           {/* TAB 2: GN OFFICERS */}
           {activeTab === 'officers' && (
             <div className="animate-zoom-in">
-              <div style={{ textAlign: 'left', marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '22px', fontWeight: '800', margin: 0, color: '#ffffff' }}>{dA.officerRegistry}</h2>
-                <span style={{ fontSize: '13.5px', color: '#94a3b8' }}>{dA.officerSub}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <div style={{ textAlign: 'left' }}>
+                  <h2 style={{ fontSize: '22px', fontWeight: '800', margin: 0, color: '#ffffff' }}>{dA.officerRegistry}</h2>
+                  <span style={{ fontSize: '13.5px', color: '#94a3b8' }}>{dA.officerSub}</span>
+                </div>
+                <button
+                  onClick={() => setShowAddOfficerModal(true)}
+                  style={{
+                    background: '#d97706',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '50px',
+                    fontSize: '13px',
+                    fontWeight: '800',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(217, 119, 6, 0.2)'
+                  }}
+                >
+                  ➕ Register GN Officer
+                </button>
               </div>
 
               <div style={{ backgroundColor: '#1e293b', borderRadius: '16px', border: '1px solid #334155', overflow: 'hidden' }}>
@@ -376,72 +509,97 @@ function AdminDashboard({ onOpenHelp }) {
                   <thead>
                     <tr style={{ backgroundColor: '#0f172a', borderBottom: '1px solid #334155', color: '#94a3b8' }}>
                       <th style={{ padding: '16px 24px' }}>{dA.thName}</th>
-                      <th style={{ padding: '16px 24px' }}>{dA.thID}</th>
+                      <th style={{ padding: '16px 24px' }}>Username</th>
                       <th style={{ padding: '16px 24px' }}>{dA.thOffice}</th>
                       <th style={{ padding: '16px 24px' }}>{dA.thStatus}</th>
                       <th style={{ padding: '16px 24px', textAlign: 'right' }}>{dA.thAction}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Row 1 */}
-                    <tr style={{ borderBottom: '1px solid #334155' }}>
-                      <td style={{ padding: '20px 24px', fontWeight: '750', color: '#ffffff' }}>Kamal Perera</td>
-                      <td style={{ padding: '20px 24px', color: '#94a3b8' }}>200324511540</td>
-                      <td style={{ padding: '20px 24px', color: '#f8fafc' }}>Colombo Division</td>
-                      <td style={{ padding: '20px 24px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: '800', background: officerStatuses['200324511540'] === 'Active' ? '#064e3b' : '#991b1b', color: officerStatuses['200324511540'] === 'Active' ? '#34d399' : '#f87171', padding: '3px 8px', borderRadius: '50px', textTransform: 'uppercase' }}>
-                          {officerStatuses['200324511540'] === 'Active' ? (lang === 'EN' ? 'Active' : lang === 'SI' ? 'ක්‍රියාකාරී' : 'செயலில் உள்ளது') : (lang === 'EN' ? 'Suspended' : lang === 'SI' ? 'අත්හිටුවා ඇත' : 'இடைநிறுத்தப்பட்டுள்ளது')}
-                        </span>
-                      </td>
-                      <td style={{ padding: '20px 24px', textAlign: 'right' }}>
-                        <button
-                          onClick={() => toggleOfficerStatus('200324511540', officerStatuses['200324511540'])}
-                          style={{
-                            background: 'transparent',
-                            border: '1.5px solid',
-                            borderColor: officerStatuses['200324511540'] === 'Active' ? '#f43f5e' : '#10b981',
-                            color: officerStatuses['200324511540'] === 'Active' ? '#f43f5e' : '#10b981',
-                            padding: '6px 16px',
-                            borderRadius: '50px',
-                            fontSize: '12px',
-                            fontWeight: '800',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {officerStatuses['200324511540'] === 'Active' ? (lang === 'EN' ? 'Deactivate Suspended' : lang === 'SI' ? 'අත්හිටුවන්න' : 'இடைநிறுத்துக') : (lang === 'EN' ? 'Activate Officer' : lang === 'SI' ? 'සක්‍රීය කරන්න' : 'செயல்படுத்துக')}
-                        </button>
-                      </td>
-                    </tr>
-
-                    {/* Row 2 */}
-                    <tr style={{ borderBottom: 'none' }}>
-                      <td style={{ padding: '20px 24px', fontWeight: '750', color: '#ffffff' }}>Sunil Silva</td>
-                      <td style={{ padding: '20px 24px', color: '#94a3b8' }}>Sunil Silva ID</td>
-                      <td style={{ padding: '20px 24px', color: '#f8fafc' }}>Kaduwela Division</td>
-                      <td style={{ padding: '20px 24px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: '800', background: officerStatuses['Sunil Silva ID'] === 'Active' ? '#064e3b' : '#991b1b', color: officerStatuses['Sunil Silva ID'] === 'Active' ? '#34d399' : '#f87171', padding: '3px 8px', borderRadius: '50px', textTransform: 'uppercase' }}>
-                          {(officerStatuses['Sunil Silva ID'] || 'Active') === 'Active' ? (lang === 'EN' ? 'Active' : lang === 'SI' ? 'ක්‍රියාකාරී' : 'செயலில் உள்ளது') : (lang === 'EN' ? 'Suspended' : lang === 'SI' ? 'අත්හිටුවා ඇත' : 'இடைநிறுத்தப்பட்டுள்ளது')}
-                        </span>
-                      </td>
-                      <td style={{ padding: '20px 24px', textAlign: 'right' }}>
-                        <button
-                          onClick={() => toggleOfficerStatus('Sunil Silva ID', officerStatuses['Sunil Silva ID'] || 'Active')}
-                          style={{
-                            background: 'transparent',
-                            border: '1.5px solid',
-                            borderColor: (officerStatuses['Sunil Silva ID'] || 'Active') === 'Active' ? '#f43f5e' : '#10b981',
-                            color: (officerStatuses['Sunil Silva ID'] || 'Active') === 'Active' ? '#f43f5e' : '#10b981',
-                            padding: '6px 16px',
-                            borderRadius: '50px',
-                            fontSize: '12px',
-                            fontWeight: '800',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {(officerStatuses['Sunil Silva ID'] || 'Active') === 'Active' ? (lang === 'EN' ? 'Deactivate Suspended' : lang === 'SI' ? 'අත්හිටුවන්න' : 'இடைநிறுத்துக') : (lang === 'EN' ? 'Activate Officer' : lang === 'SI' ? 'සක්‍රීය කරන්න' : 'செயல்படுத்துக')}
-                        </button>
-                      </td>
-                    </tr>
+                    {officers.length > 0 ? (
+                      officers.map((officer, idx) => (
+                        <tr key={officer.gn_id || idx} style={{ borderBottom: idx === officers.length - 1 ? 'none' : '1px solid #334155' }}>
+                          <td style={{ padding: '20px 24px', fontWeight: '750', color: '#ffffff' }}>
+                            <div>{officer.name}</div>
+                            <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 'normal' }}>{officer.email} | {officer.mobile}</div>
+                          </td>
+                          <td style={{ padding: '20px 24px', color: '#94a3b8' }}>{officer.username}</td>
+                          <td style={{ padding: '20px 24px', color: '#f8fafc' }}>{officer.division_name || 'Not Assigned'}</td>
+                          <td style={{ padding: '20px 24px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: '800', background: officer.status === 'Active' ? '#064e3b' : '#991b1b', color: officer.status === 'Active' ? '#34d399' : '#f87171', padding: '3px 8px', borderRadius: '50px', textTransform: 'uppercase' }}>
+                              {officer.status === 'Active' ? (lang === 'EN' ? 'Active' : lang === 'SI' ? 'ක්‍රියාකාරී' : 'செயலில் உள்ளது') : (lang === 'EN' ? 'Suspended' : lang === 'SI' ? 'අත්හිටුවා ඇත' : 'இடைநிறுத்தப்பட்டுள்ளது')}
+                            </span>
+                          </td>
+                          <td style={{ padding: '20px 24px', textAlign: 'right' }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', alignItems: 'center' }}>
+                              <button
+                                onClick={() => toggleOfficerStatus(officer.gn_id, officer.status)}
+                                style={{
+                                  background: 'transparent',
+                                  border: '1.5px solid',
+                                  borderColor: officer.status === 'Active' ? '#f43f5e' : '#10b981',
+                                  color: officer.status === 'Active' ? '#f43f5e' : '#10b981',
+                                  padding: '6px 14px',
+                                  borderRadius: '50px',
+                                  fontSize: '12px',
+                                  fontWeight: '800',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {officer.status === 'Active' ? 'Suspend' : 'Activate'}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditOfficer({
+                                    id: officer.gn_id,
+                                    username: officer.username,
+                                    name: officer.name,
+                                    email: officer.email,
+                                    mobile: officer.mobile,
+                                    division: officer.division_name || '',
+                                    status: officer.status
+                                  })
+                                  setShowEditOfficerModal(true)
+                                }}
+                                style={{
+                                  background: 'transparent',
+                                  border: '1.5px solid #3b82f6',
+                                  color: '#3b82f6',
+                                  padding: '6px 14px',
+                                  borderRadius: '50px',
+                                  fontSize: '12px',
+                                  fontWeight: '800',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteOfficer(officer.gn_id)}
+                                style={{
+                                  background: 'transparent',
+                                  border: '1.5px solid #ef4444',
+                                  color: '#ef4444',
+                                  padding: '6px 14px',
+                                  borderRadius: '50px',
+                                  fontSize: '12px',
+                                  fontWeight: '800',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>
+                          No Grama Niladhari Officers found in the system.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -468,65 +626,90 @@ function AdminDashboard({ onOpenHelp }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Row 1 */}
-                    <tr style={{ borderBottom: '1px solid #334155' }}>
-                      <td style={{ padding: '20px 24px', fontWeight: '750', color: '#ffffff' }}>Nimal Perera</td>
-                      <td style={{ padding: '20px 24px', color: '#94a3b8' }}>200324511540</td>
-                      <td style={{ padding: '20px 24px', color: '#f8fafc' }}>Colombo Office</td>
-                      <td style={{ padding: '20px 24px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: '800', background: residentStatuses['200324511540'] === 'Active' ? '#064e3b' : '#991b1b', color: residentStatuses['200324511540'] === 'Active' ? '#34d399' : '#f87171', padding: '3px 8px', borderRadius: '50px', textTransform: 'uppercase' }}>
-                          {residentStatuses['200324511540'] === 'Active' ? (lang === 'EN' ? 'Active' : lang === 'SI' ? 'ක්‍රියාකාරී' : 'செயலில் உள்ளது') : (lang === 'EN' ? 'Suspended' : lang === 'SI' ? 'අත්හිටුවා ඇත' : 'இடைநிறுத்தப்பட்டுள்ளது')}
-                        </span>
-                      </td>
-                      <td style={{ padding: '20px 24px', textAlign: 'right' }}>
-                        <button
-                          onClick={() => toggleResidentStatus('200324511540', residentStatuses['200324511540'])}
-                          style={{
-                            background: 'transparent',
-                            border: '1.5px solid',
-                            borderColor: residentStatuses['200324511540'] === 'Active' ? '#f43f5e' : '#10b981',
-                            color: residentStatuses['200324511540'] === 'Active' ? '#f43f5e' : '#10b981',
-                            padding: '6px 16px',
-                            borderRadius: '50px',
-                            fontSize: '12px',
-                            fontWeight: '800',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {residentStatuses['200324511540'] === 'Active' ? (lang === 'EN' ? 'Suspend Profile' : lang === 'SI' ? 'අත්හිටුවන්න' : 'இடைநிறுத்துக') : (lang === 'EN' ? 'Activate Profile' : lang === 'SI' ? 'සක්‍රීය කරන්න' : 'செயல்படுத்துக')}
-                        </button>
-                      </td>
-                    </tr>
-
-                    {/* Row 2 */}
-                    <tr style={{ borderBottom: 'none' }}>
-                      <td style={{ padding: '20px 24px', fontWeight: '750', color: '#ffffff' }}>Kamala Silva</td>
-                      <td style={{ padding: '20px 24px', color: '#94a3b8' }}>789456123V</td>
-                      <td style={{ padding: '20px 24px', color: '#f8fafc' }}>Maharagama Office</td>
-                      <td style={{ padding: '20px 24px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: '800', background: residentStatuses['789456123V'] === 'Active' ? '#064e3b' : '#991b1b', color: residentStatuses['789456123V'] === 'Active' ? '#34d399' : '#f87171', padding: '3px 8px', borderRadius: '50px', textTransform: 'uppercase' }}>
-                          {(residentStatuses['789456123V'] || 'Active') === 'Active' ? (lang === 'EN' ? 'Active' : lang === 'SI' ? 'ක්‍රියාකාරී' : 'செயலில் உள்ளது') : (lang === 'EN' ? 'Suspended' : lang === 'SI' ? 'අත්හිටුවා ඇත' : 'இடைநிறுத்தப்பட்டுள்ளது')}
-                        </span>
-                      </td>
-                      <td style={{ padding: '20px 24px', textAlign: 'right' }}>
-                        <button
-                          onClick={() => toggleResidentStatus('789456123V', residentStatuses['789456123V'] || 'Active')}
-                          style={{
-                            background: 'transparent',
-                            border: '1.5px solid',
-                            borderColor: (residentStatuses['789456123V'] || 'Active') === 'Active' ? '#f43f5e' : '#10b981',
-                            color: (residentStatuses['789456123V'] || 'Active') === 'Active' ? '#f43f5e' : '#10b981',
-                            padding: '6px 16px',
-                            borderRadius: '50px',
-                            fontSize: '12px',
-                            fontWeight: '800',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {(residentStatuses['789456123V'] || 'Active') === 'Active' ? (lang === 'EN' ? 'Suspend Profile' : lang === 'SI' ? 'අත්හිටුවන්න' : 'இடைநிறுத்துக') : (lang === 'EN' ? 'Activate Profile' : lang === 'SI' ? 'සක්‍රීය කරන්න' : 'செயல்படுத்துக')}
-                        </button>
-                      </td>
-                    </tr>
+                    {residents.length > 0 ? (
+                      residents.map((resident, idx) => (
+                        <tr key={resident.r_nic || idx} style={{ borderBottom: idx === residents.length - 1 ? 'none' : '1px solid #334155' }}>
+                          <td style={{ padding: '20px 24px', fontWeight: '750', color: '#ffffff' }}>
+                            <div>{resident.name}</div>
+                            <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 'normal' }}>{resident.email} | {resident.mobile_no}</div>
+                          </td>
+                          <td style={{ padding: '20px 24px', color: '#94a3b8' }}>{resident.r_nic}</td>
+                          <td style={{ padding: '20px 24px', color: '#f8fafc' }}>{resident.division_name || 'Not Specified'}</td>
+                          <td style={{ padding: '20px 24px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: '800', background: resident.status === 'Active' ? '#064e3b' : '#991b1b', color: resident.status === 'Active' ? '#34d399' : '#f87171', padding: '3px 8px', borderRadius: '50px', textTransform: 'uppercase' }}>
+                              {resident.status === 'Active' ? (lang === 'EN' ? 'Active' : lang === 'SI' ? 'ක්‍රියාකාරී' : 'செயலில் உள்ளது') : (lang === 'EN' ? 'Suspended' : lang === 'SI' ? 'අත්හිටුවා ඇත' : 'இடைநிறுத்தப்பட்டுள்ளது')}
+                            </span>
+                          </td>
+                          <td style={{ padding: '20px 24px', textAlign: 'right' }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', alignItems: 'center' }}>
+                              <button
+                                onClick={() => toggleResidentStatus(resident.r_nic, resident.status)}
+                                style={{
+                                  background: 'transparent',
+                                  border: '1.5px solid',
+                                  borderColor: resident.status === 'Active' ? '#f43f5e' : '#10b981',
+                                  color: resident.status === 'Active' ? '#f43f5e' : '#10b981',
+                                  padding: '6px 14px',
+                                  borderRadius: '50px',
+                                  fontSize: '12px',
+                                  fontWeight: '800',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {resident.status === 'Active' ? 'Suspend' : 'Activate'}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditResident({
+                                    nic: resident.r_nic,
+                                    name: resident.name,
+                                    email: resident.email,
+                                    mobile_no: resident.mobile_no,
+                                    status: resident.status,
+                                    occupation: resident.occupation || '',
+                                    household_number: resident.household_number || ''
+                                  })
+                                  setShowEditResidentModal(true)
+                                }}
+                                style={{
+                                  background: 'transparent',
+                                  border: '1.5px solid #3b82f6',
+                                  color: '#3b82f6',
+                                  padding: '6px 14px',
+                                  borderRadius: '50px',
+                                  fontSize: '12px',
+                                  fontWeight: '800',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteResident(resident.r_nic)}
+                                style={{
+                                  background: 'transparent',
+                                  border: '1.5px solid #ef4444',
+                                  color: '#ef4444',
+                                  padding: '6px 14px',
+                                  borderRadius: '50px',
+                                  fontSize: '12px',
+                                  fontWeight: '800',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>
+                          No Registered Residents found in the system.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -605,6 +788,298 @@ function AdminDashboard({ onOpenHelp }) {
           <p style={{ color: '#94a3b8', margin: 0 }}>© 2026 SmartGN. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* Modals overlays */}
+      {showAddOfficerModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15,23,42,0.85)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(8px)' }}>
+          <div className="portal-card" style={{ maxWidth: '500px', backgroundColor: '#1e293b', borderColor: '#334155', padding: '32px', color: '#ffffff', border: '1px solid #334155', borderRadius: '24px' }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '20px', fontWeight: 'bold' }}>Register GN Officer</h3>
+            <form onSubmit={handleCreateOfficer}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Username</label>
+                  <input
+                    type="text"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={newOfficer.username}
+                    onChange={(e) => setNewOfficer({ ...newOfficer, username: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Name</label>
+                  <input
+                    type="text"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={newOfficer.name}
+                    onChange={(e) => setNewOfficer({ ...newOfficer, name: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Email</label>
+                  <input
+                    type="email"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={newOfficer.email}
+                    onChange={(e) => setNewOfficer({ ...newOfficer, email: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Mobile</label>
+                  <input
+                    type="text"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={newOfficer.mobile}
+                    onChange={(e) => setNewOfficer({ ...newOfficer, mobile: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>GN Division</label>
+                  <input
+                    type="text"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    placeholder="e.g. Colombo, Borella"
+                    value={newOfficer.division}
+                    onChange={(e) => setNewOfficer({ ...newOfficer, division: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Password</label>
+                  <input
+                    type="password"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={newOfficer.password}
+                    onChange={(e) => setNewOfficer({ ...newOfficer, password: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAddOfficerModal(false)}
+                  style={{ padding: '8px 16px', borderRadius: '50px', border: '1px solid #475569', background: 'transparent', color: '#ffffff', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{ padding: '8px 20px', borderRadius: '50px', border: 'none', background: '#d97706', color: '#ffffff', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showEditOfficerModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15,23,42,0.85)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(8px)' }}>
+          <div className="portal-card" style={{ maxWidth: '500px', backgroundColor: '#1e293b', borderColor: '#334155', padding: '32px', color: '#ffffff', border: '1px solid #334155', borderRadius: '24px' }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '20px', fontWeight: 'bold' }}>Edit GN Officer</h3>
+            <form onSubmit={handleUpdateOfficer}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Username</label>
+                  <input
+                    type="text"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={editOfficer.username}
+                    onChange={(e) => setEditOfficer({ ...editOfficer, username: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Name</label>
+                  <input
+                    type="text"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={editOfficer.name}
+                    onChange={(e) => setEditOfficer({ ...editOfficer, name: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Email</label>
+                  <input
+                    type="email"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={editOfficer.email}
+                    onChange={(e) => setEditOfficer({ ...editOfficer, email: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Mobile</label>
+                  <input
+                    type="text"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={editOfficer.mobile}
+                    onChange={(e) => setEditOfficer({ ...editOfficer, mobile: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>GN Division</label>
+                  <input
+                    type="text"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={editOfficer.division}
+                    onChange={(e) => setEditOfficer({ ...editOfficer, division: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Status</label>
+                  <select
+                    className="register-control register-select"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff', height: '42px', appearance: 'auto' }}
+                    value={editOfficer.status}
+                    onChange={(e) => setEditOfficer({ ...editOfficer, status: e.target.value })}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Suspended">Suspended</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowEditOfficerModal(false)}
+                  style={{ padding: '8px 16px', borderRadius: '50px', border: '1px solid #475569', background: 'transparent', color: '#ffffff', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{ padding: '8px 20px', borderRadius: '50px', border: 'none', background: '#d97706', color: '#ffffff', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showEditResidentModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15,23,42,0.85)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(8px)' }}>
+          <div className="portal-card" style={{ maxWidth: '500px', backgroundColor: '#1e293b', borderColor: '#334155', padding: '32px', color: '#ffffff', border: '1px solid #334155', borderRadius: '24px' }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '20px', fontWeight: 'bold' }}>Edit Resident Account</h3>
+            <form onSubmit={handleUpdateResident}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>NIC Number (ReadOnly)</label>
+                  <input
+                    type="text"
+                    disabled
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#94a3b8' }}
+                    value={editResident.nic}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Name</label>
+                  <input
+                    type="text"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={editResident.name}
+                    onChange={(e) => setEditResident({ ...editResident, name: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Email</label>
+                  <input
+                    type="email"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={editResident.email}
+                    onChange={(e) => setEditResident({ ...editResident, email: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Mobile</label>
+                  <input
+                    type="text"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={editResident.mobile_no}
+                    onChange={(e) => setEditResident({ ...editResident, mobile_no: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Occupation</label>
+                  <input
+                    type="text"
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={editResident.occupation}
+                    onChange={(e) => setEditResident({ ...editResident, occupation: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Household Number</label>
+                  <input
+                    type="text"
+                    required
+                    className="register-control"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff' }}
+                    value={editResident.household_number}
+                    onChange={(e) => setEditResident({ ...editResident, household_number: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Status</label>
+                  <select
+                    className="register-control register-select"
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: '#ffffff', height: '42px', appearance: 'auto' }}
+                    value={editResident.status}
+                    onChange={(e) => setEditResident({ ...editResident, status: e.target.value })}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Suspended">Suspended</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowEditResidentModal(false)}
+                  style={{ padding: '8px 16px', borderRadius: '50px', border: '1px solid #475569', background: 'transparent', color: '#ffffff', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{ padding: '8px 20px', borderRadius: '50px', border: 'none', background: '#d97706', color: '#ffffff', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

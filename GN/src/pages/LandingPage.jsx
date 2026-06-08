@@ -72,28 +72,28 @@ function LandingPage({ onOpenHelp }) {
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#F7FAFC] text-[#2D3748] flex flex-col items-stretch border border-red-500 text-center">
+    <div className="landing-container">
       
       {/* 1. Header/Navbar */}
-      <header className="flex justify-between items-center py-3 px-16 bg-[#EBF8FF] border border-[red] sticky top-0 z-[100] shadow-[0_5px_25px_rgba(0,0,0,0.2)]">
-        <div className="flex flex-col items-start text-left" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+      <header className="landing-navbar">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', cursor: 'pointer' }} onClick={() => navigate('/')}>
           <img 
             src={logoImage} 
             alt="SmartGN Logo" 
-            className="w-70 h-auto border border-[red]"
+            className="landing-logo-img"
             />
         </div>
 
-        <nav className="flex items-center gap-9">
-          <a href="#home" className="flex items-center gap-2 no-underline text-sm font-semibold text-slate-600 py-1.5 px-1 transition-all duration-200">
+        <nav className="landing-nav-links">
+          <a href="#home" className="landing-nav-link">
             <img src={homeIcon} alt="Home" className="w-auto h-5" />
             {t.home}
           </a>
-          <a href="#about" className="flex items-center gap-2 no-underline text-sm font-semibold text-slate-600 py-1.5 px-1 transition-all duration-200">
+          <a href="#about" className="landing-nav-link">
             <img src={aboutIcon} alt="About" className="w-auto h-5" />
             {navTranslations[lang].about}
           </a>
-          <a href="#services" className="flex items-center gap-2 no-underline text-sm font-semibold text-slate-600 py-1.5 px-1 transition-all duration-200">
+          <a href="#services" className="landing-nav-link">
             <img src={servicesIcon} alt="Services" className="w-auto h-5" />
             {navTranslations[lang].services}
           </a>
