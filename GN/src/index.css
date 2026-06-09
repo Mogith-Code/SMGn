@@ -1,7 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
-@import "tailwindcss";
 
-@tailwind utilities;
 
 html {
   scroll-behavior: smooth;
@@ -58,10 +56,17 @@ html {
 }
 
 body {
-  @apply m-0 p-0 min-h-screen flex items-center justify-center overflow-x-hidden relative border border-green-500;
-    font-family: var(--font-sans);
-    color: var(--text-primary);
-    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+  position: relative;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
 }
 
 /* Animated decorative background blobs to create a highly premium, modern feel */
@@ -127,5 +132,9 @@ body {
 }
 
 #root {
- @apply flex justify-center items-center w-full min-h-screen;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
 }

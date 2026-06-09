@@ -3451,6 +3451,48 @@
 /* Dynamic Language Selector Dropdown Style Updates */
 .landing-lang-selector {
   position: relative;
+  display: inline-block;
+}
+
+.lang-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 50px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  background-color: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.lang-wrapper:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.lang-globe-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.lang-chevron {
+  width: 20px;
+  height: 20px;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.lang-chevron.open {
+  transform: rotate(180deg);
 }
 
 .lang-dropdown-options {
@@ -3539,6 +3581,58 @@
   background-color: #3b82f6 !important;
   color: #ffffff !important;
 }
+
+/* Custom Landing Page CSS to replace Tailwind classes */
+.landing-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #F7FAFC;
+  color: #2D3748;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: center;
+}
+
+.landing-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 64px;
+  background-color: #EBF8FF;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+}
+
+.landing-logo-img {
+  width: 280px;
+  height: auto;
+}
+
+.landing-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.landing-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  padding: 6px 4px;
+  transition: all 0.2s ease;
+}
+
+.landing-nav-link:hover {
+  color: #1a2e56;
+}
+
 
 
 

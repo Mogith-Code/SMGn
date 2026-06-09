@@ -31,19 +31,19 @@ function LanguageSelector() {
   const activeLanguage = languages.find(l => l.code === lang) || languages[0]
 
   return (
-    <div className="relative inline-block" ref={dropdownRef}>
-      <div className="flex items-center gap-2 border-[1.5px] border-slate-300 rounded-full py-1.5 px-3.5 text-[13px] font-semibold text-slate-800 bg-slate-50 cursor-pointer transition-all duration-200 hover:bg-slate-100" onClick={() => setIsOpen(!isOpen)} role="button" aria-haspopup="true" aria-expanded={isOpen}>
-        <img src={languageIcon} alt="Language" className="w-auto h-5" />
+    <div className="landing-lang-selector" ref={dropdownRef}>
+      <div className="lang-wrapper" onClick={() => setIsOpen(!isOpen)} role="button" aria-haspopup="true" aria-expanded={isOpen}>
+        <img src={languageIcon} alt="Language" className="lang-globe-icon" />
         <span>{activeLanguage.name}</span>
-        <img src={arrowDownIcon} alt="Select Language" className={`w-auto h-5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} /> 
+        <img src={arrowDownIcon} alt="Select Language" className={`lang-chevron ${isOpen ? 'open' : ''}`} /> 
       </div>
 
       {isOpen && (
-        <ul className="absolute top-[calc(100%+8px)] right-0 min-w-[140px] bg-white/80 backdrop-blur-md border border-gray-200 shadow-lg rounded-xl p-2 m-0 list-none z-[9999] animate-[langFadeIn_0.2s_ease]">
+        <ul className="lang-dropdown-options">
           {languages.map((item) => (
             <li
               key={item.code}
-              className={`flex items-center justify-between px-3 py-2 text-[13.5px] font-medium text-slate-800 rounded-lg cursor-pointer transition-all duration-150 hover:bg-gray-100 ${lang === item.code ? 'selected' : ''}`}
+              className={`lang-dropdown-option ${lang === item.code ? 'selected' : ''}`}
               onClick={() => {
                 changeLanguage(item.code)
                 setIsOpen(false)
@@ -51,7 +51,7 @@ function LanguageSelector() {
             >
               {item.name}
               {lang === item.code && (
-                <img src={selectedIcon} alt="Language" className="w-auto h-5" />
+                <img src={selectedIcon} alt="Language" className="lang-globe-icon" style={{ width: '16px', height: '16px' }} />
               )}
             </li>
           ))}

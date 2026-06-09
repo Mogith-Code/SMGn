@@ -289,11 +289,11 @@ function ResidentAppointments({ onOpenHelp }) {
         </aside>
 
         {/* Main Panel Content */}
-        <main className="dashboard-content">
+        <main className="flex-grow bg-slate-50 py-8 px-14 flex flex-col gap-6 text-left relative">
           
           {/* Back button */}
-          <div className="form-header" style={{ marginBottom: '16px', justifyContent: 'flex-start' }}>
-            <button className="btn-back" onClick={() => navigate('/dashboard/resident', { state: { successUser, division: userDivision } })}>
+          <div className="flex justify-start mb-4">
+            <button className="bg-transparent border-none text-gray-500 text-sm font-medium cursor-pointer flex items-center gap-1.5 py-1.5 px-3 rounded-lg transition-all duration-200 hover:bg-gray-100 hover:text-gray-700" onClick={() => navigate('/dashboard/resident', { state: { successUser, division: userDivision } })}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
@@ -302,65 +302,65 @@ function ResidentAppointments({ onOpenHelp }) {
             </button>
           </div>
 
-          <h2 className="content-greeting" style={{ marginBottom: '24px' }}>Appointments</h2>
+          <h2 className="mb-6">Appointments</h2>
 
           {/* Centered Stats Widget Cards */}
-          <div className="stats-grid-appointments">
-            <div className="stat-card-appointment">
-              <div className="stat-appointment-icon">
+          <div className="grid grid-cols-3 gap-6 mb-6">
+            <div className="bg-white border-[1.5px] border-slate-300 rounded-2xl p-6 flex flex-col items-center text-center shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-400">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3.5 flex-shrink-0">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
               </div>
-              <span className="stat-appointment-label">Pending appointment requests</span>
-              <span className="stat-appointment-value">{pendingCount}</span>
+              <span className="text-[13.5px] font-semibold text-slate-600 leading-[1.4] mb-2">Pending appointment requests</span>
+              <span className="text-2xl font-extrabold text-slate-800">{pendingCount}</span>
             </div>
 
-            <div className="stat-card-appointment">
-              <div className="stat-appointment-icon">
+            <div className="bg-white border-[1.5px] border-slate-300 rounded-2xl p-6 flex flex-col items-center text-center shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-400">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3.5 flex-shrink-0">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                   <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
               </div>
-              <span className="stat-appointment-label">Approved appointment requests</span>
-              <span className="stat-appointment-value">{approvedCount}</span>
+              <span className="text-[13.5px] font-semibold text-slate-600 leading-[1.4] mb-2">Approved appointment requests</span>
+              <span className="text-2xl font-extrabold text-slate-800">{approvedCount}</span>
             </div>
 
             <div className="stat-card-appointment action-card" onClick={() => setIsBookingMode(!isBookingMode)}>
-              <div className="stat-appointment-icon">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3.5 flex-shrink-0">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
               </div>
-              <span className="stat-appointment-label">Book an appointment</span>
-              <span className="stat-appointment-value">{isBookingMode ? 'Close Form' : 'Book Now'}</span>
+              <span className="text-[13.5px] font-semibold text-slate-600 leading-[1.4] mb-2">Book an appointment</span>
+              <span className="text-2xl font-extrabold text-slate-800">{isBookingMode ? 'Close Form' : 'Book Now'}</span>
             </div>
           </div>
 
           {/* Interactive Layout Content */}
-          <div className="appointments-layout">
+          <div className="grid-cols-1 gap-6">
             
             {/* Left Box: Calendar Widget or Booking Form */}
             {!isBookingMode ? (
-              <div className="calendar-widget-card">
-                <div className="calendar-widget-header">
-                  <button className="calendar-nav-btn">{"<"}</button>
+              <div className="bg-white border-[1.5px] border-slate-300 rounded-2xl p-8 shadow-sm w-full">
+                <div className="flex justify-center items-center gap-12 mb-6 text-[15px] font-[750] text-[#1a2e56]">
+                  <button className="bg-transparent border-none text-base font-extrabold text-slate-600 cursor-pointer py-1 px-2 rounded transition-all duration-200 outline-none focus:outline-none hover:bg-slate-100 hover:text-slate-800">{"<"}</button>
                   <span>May 2026</span>
-                  <button className="calendar-nav-btn">{">"}</button>
+                  <button className="bg-transparent border-none text-base font-extrabold text-slate-600 cursor-pointer py-1 px-2 rounded transition-all duration-200 outline-none focus:outline-none hover:bg-slate-100 hover:text-slate-800">{">"}</button>
                 </div>
 
-                <div className="calendar-grid">
+                <div className="grid grid-cols-7 gap-3 w-full text-center">
                   {/* Weekdays headers */}
-                  <span className="calendar-weekday-label">Sun</span>
-                  <span className="calendar-weekday-label">Mon</span>
-                  <span className="calendar-weekday-label">Tue</span>
-                  <span className="calendar-weekday-label">Wed</span>
-                  <span className="calendar-weekday-label">Thu</span>
-                  <span className="calendar-weekday-label">Fri</span>
-                  <span className="calendar-weekday-label">Sat</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Sun</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Mon</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Tue</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Wed</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Thu</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Fri</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2l">Sat</span>
 
                   {/* Calendar Days */}
                   {calendarCells.map((cell, index) => {
@@ -368,13 +368,13 @@ function ResidentAppointments({ onOpenHelp }) {
                     const isSelected = selectedDay === cell.day
                     
                     if (cell.day === null) {
-                      return <span key={index} className="calendar-day-cell other-month"></span>
+                      return <span key={index} className="text-slate-300 cursor-not-allowed"></span>
                     }
 
                     return (
                       <span
                         key={index}
-                        className={`calendar-day-cell ${cell.wrapped ? 'other-month' : ''} ${hasBooking ? 'has-booking' : ''} ${isSelected ? 'selected-day' : ''}`}
+                        className={`aspect-[1.4] flex flex-col items-center justify-center text-[13.5px] font-semibold text-slate-800 cursor-pointer rounded-lg transition-all duration-200 relative border-[1.5px] border-transparent select-none hover:bg-slate-100 ${cell.wrapped ? 'other-month' : ''} ${hasBooking ? 'has-booking' : ''} ${isSelected ? 'selected-day' : ''}`}
                         onClick={() => cell.day && setSelectedDay(cell.day)}
                       >
                         {cell.day < 10 ? '0' + cell.day : cell.day}
@@ -384,13 +384,13 @@ function ResidentAppointments({ onOpenHelp }) {
                 </div>
               </div>
             ) : (
-              <div className="dashboard-announcements-card" style={{ padding: '32px' }}>
-                <h3 className="card-inner-title" style={{ borderBottom: '1.5px solid #cbd5e1', paddingBottom: '12px', marginBottom: '20px' }}>
+              <div className="p-8">
+                <h3 className="border-b-[1.5px] border-slate-300 pb-3 mb-5">
                   Request New Appointment
                 </h3>
 
                 <form onSubmit={handleCreateBooking}>
-                  <div className="form-grid" style={{ gap: '16px' }}>
+                  <div className="gap-4">
                     
                     <div className="form-group">
                       <label htmlFor="purposeSelect">Appointment Purpose</label>
