@@ -164,36 +164,36 @@ function ResidentAppointments({ onOpenHelp }) {
   ]
 
   return (
-    <div className="dashboard-container">
+    <div className="w-full min-h-screen bg-[#F7FAFC] text-[#2D3748] flex flex-col items-stretch border border-red-500 text-center">
       
       {/* 1. Header */}
-      <header className="dashboard-header">
+      <header className="flex justify-between items-center py-3 px-16 bg-white border-b-[1.5px] border-slate-300 sticky top-0 z-[100] shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
         <div className="landing-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <span className="logo-smart">Smart</span>
           <span className="logo-gn">GN</span>
           <p className="logo-subtext">{t.tagline}</p>
         </div>
 
-        <div className="header-right">
+        <div className="flex items-center gap-7">
           <LanguageSelector />
 
           {/* Notifications */}
-          <div className="notification-bell">
+          <div className="relative cursor-pointer text-slate-600 flex items-center justify-center transition-colors duration-200">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span className="bell-badge">2</span>
+            <span className="absolute -top-1.5 -right-1.5 bg-amber-600 text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center border-[1.5px] border-white">2</span>
           </div>
 
           {/* User Profile Info */}
-          <div className="user-profile-info">
-            <div className="user-text-details">
-              <span className="user-division">{userDivision}</span>
-              <span className="user-name">{successUser}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-end text-right leading-[1.35]">
+              <span className="text-[9.5px] font-[750] text-slate-500 uppercase tracking-[0.5px]">{userDivision}</span>
+              <span className="text-[13.5px] font-bold text-[#1a2e56]">{successUser}</span>
             </div>
-            <div className="user-avatar-circle">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="avatar-svg">
+            <div className="w-[38px] h-[38px] rounded-full bg-slate-200 flex items-center justify-center text-slate-600 border-[1.5px] border-slate-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
@@ -203,21 +203,21 @@ function ResidentAppointments({ onOpenHelp }) {
       </header>
 
       {/* 2. Main Layout */}
-      <div className="dashboard-main-layout">
+      <div className="flex gap-[20px]">
         
         {/* Sidebar Nav */}
-        <aside className="dashboard-sidebar">
-          <nav className="sidebar-menu">
-            <button className="menu-btn" onClick={() => navigate('/')}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+        <aside className="w-[280px] bg-white border-r border-[#2D37482D] py-[60px] pr-[20px]">
+          <nav className="flex flex-col gap-[5px]">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
               <span>{t.home}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <rect x="3" y="3" width="7" height="9" rx="1"></rect>
                 <rect x="14" y="3" width="7" height="5" rx="1"></rect>
                 <rect x="14" y="12" width="7" height="9" rx="1"></rect>
@@ -226,16 +226,16 @@ function ResidentAppointments({ onOpenHelp }) {
               <span>{t.dashboard}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident/profile', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/profile', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
               <span>{t.profile}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident/household', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/household', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <circle cx="9" cy="14" r="2"></circle>
                 <circle cx="15" cy="14" r="2"></circle>
@@ -243,15 +243,15 @@ function ResidentAppointments({ onOpenHelp }) {
               <span>{t.family}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident/certificates', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/certificates', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 <circle cx="12" cy="11" r="3"></circle>
               </svg>
               <span>{t.certificates}</span>
             </button>
 
-            <button className="menu-btn active">
+            <button className="bg-[#1c355e] flex gap-3.5 py-3 px-7 items-center text-white rounded-r-full cursor-pointer shadow-[0_4px_10px_rgba(28,53,94,0.15)]" onClick={() => navigate('/dashboard/resident/appointments', { state: { successUser, division: userDivision } })}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -261,16 +261,16 @@ function ResidentAppointments({ onOpenHelp }) {
               <span>{t.appointments}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident/allowances', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/allowances', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
                 <line x1="12" y1="4" x2="12" y2="20"></line>
               </svg>
               <span>{t.allowances}</span>
             </button>
 
-            <button className="menu-btn" onClick={() => navigate('/dashboard/resident/disaster', { state: { successUser, division: userDivision } })}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/disaster', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                 <line x1="12" y1="9" x2="12" y2="13"></line>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -278,8 +278,8 @@ function ResidentAppointments({ onOpenHelp }) {
               <span>{t.disaster}</span>
             </button>
 
-            <button className="menu-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon">
+            <button className="flex items-center gap-[10px] w-full border-none bg-transparent py-[10px] px-[30px] cursor-pointer text-[16px] font-regular text-[#2D3748] text-left transition-all duration-200 outline-none focus:outline-none" onClick={() => navigate('/dashboard/resident/announcements', { state: { successUser, division: userDivision } })}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
               </svg>
@@ -289,11 +289,11 @@ function ResidentAppointments({ onOpenHelp }) {
         </aside>
 
         {/* Main Panel Content */}
-        <main className="dashboard-content">
+        <main className="flex-grow bg-slate-50 py-8 px-14 flex flex-col gap-6 text-left relative">
           
           {/* Back button */}
-          <div className="form-header" style={{ marginBottom: '16px', justifyContent: 'flex-start' }}>
-            <button className="btn-back" onClick={() => navigate('/dashboard/resident', { state: { successUser, division: userDivision } })}>
+          <div className="flex justify-start mb-4">
+            <button className="bg-transparent border-none text-gray-500 text-sm font-medium cursor-pointer flex items-center gap-1.5 py-1.5 px-3 rounded-lg transition-all duration-200 hover:bg-gray-100 hover:text-gray-700" onClick={() => navigate('/dashboard/resident', { state: { successUser, division: userDivision } })}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
@@ -302,65 +302,65 @@ function ResidentAppointments({ onOpenHelp }) {
             </button>
           </div>
 
-          <h2 className="content-greeting" style={{ marginBottom: '24px' }}>Appointments</h2>
+          <h2 className="mb-6">Appointments</h2>
 
           {/* Centered Stats Widget Cards */}
-          <div className="stats-grid-appointments">
-            <div className="stat-card-appointment">
-              <div className="stat-appointment-icon">
+          <div className="grid grid-cols-3 gap-6 mb-6">
+            <div className="bg-white border-[1.5px] border-slate-300 rounded-2xl p-6 flex flex-col items-center text-center shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-400">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3.5 flex-shrink-0">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
               </div>
-              <span className="stat-appointment-label">Pending appointment requests</span>
-              <span className="stat-appointment-value">{pendingCount}</span>
+              <span className="text-[13.5px] font-semibold text-slate-600 leading-[1.4] mb-2">Pending appointment requests</span>
+              <span className="text-2xl font-extrabold text-slate-800">{pendingCount}</span>
             </div>
 
-            <div className="stat-card-appointment">
-              <div className="stat-appointment-icon">
+            <div className="bg-white border-[1.5px] border-slate-300 rounded-2xl p-6 flex flex-col items-center text-center shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-400">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3.5 flex-shrink-0">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                   <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
               </div>
-              <span className="stat-appointment-label">Approved appointment requests</span>
-              <span className="stat-appointment-value">{approvedCount}</span>
+              <span className="text-[13.5px] font-semibold text-slate-600 leading-[1.4] mb-2">Approved appointment requests</span>
+              <span className="text-2xl font-extrabold text-slate-800">{approvedCount}</span>
             </div>
 
             <div className="stat-card-appointment action-card" onClick={() => setIsBookingMode(!isBookingMode)}>
-              <div className="stat-appointment-icon">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3.5 flex-shrink-0">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
               </div>
-              <span className="stat-appointment-label">Book an appointment</span>
-              <span className="stat-appointment-value">{isBookingMode ? 'Close Form' : 'Book Now'}</span>
+              <span className="text-[13.5px] font-semibold text-slate-600 leading-[1.4] mb-2">Book an appointment</span>
+              <span className="text-2xl font-extrabold text-slate-800">{isBookingMode ? 'Close Form' : 'Book Now'}</span>
             </div>
           </div>
 
           {/* Interactive Layout Content */}
-          <div className="appointments-layout">
+          <div className="grid-cols-1 gap-6">
             
             {/* Left Box: Calendar Widget or Booking Form */}
             {!isBookingMode ? (
-              <div className="calendar-widget-card">
-                <div className="calendar-widget-header">
-                  <button className="calendar-nav-btn">{"<"}</button>
+              <div className="bg-white border-[1.5px] border-slate-300 rounded-2xl p-8 shadow-sm w-full">
+                <div className="flex justify-center items-center gap-12 mb-6 text-[15px] font-[750] text-[#1a2e56]">
+                  <button className="bg-transparent border-none text-base font-extrabold text-slate-600 cursor-pointer py-1 px-2 rounded transition-all duration-200 outline-none focus:outline-none hover:bg-slate-100 hover:text-slate-800">{"<"}</button>
                   <span>May 2026</span>
-                  <button className="calendar-nav-btn">{">"}</button>
+                  <button className="bg-transparent border-none text-base font-extrabold text-slate-600 cursor-pointer py-1 px-2 rounded transition-all duration-200 outline-none focus:outline-none hover:bg-slate-100 hover:text-slate-800">{">"}</button>
                 </div>
 
-                <div className="calendar-grid">
+                <div className="grid grid-cols-7 gap-3 w-full text-center">
                   {/* Weekdays headers */}
-                  <span className="calendar-weekday-label">Sun</span>
-                  <span className="calendar-weekday-label">Mon</span>
-                  <span className="calendar-weekday-label">Tue</span>
-                  <span className="calendar-weekday-label">Wed</span>
-                  <span className="calendar-weekday-label">Thu</span>
-                  <span className="calendar-weekday-label">Fri</span>
-                  <span className="calendar-weekday-label">Sat</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Sun</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Mon</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Tue</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Wed</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Thu</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2">Fri</span>
+                  <span className="text-[13.5px] font-[750] text-[#1a2e56] pb-2 border-b-[1.5px] border-slate-300 mb-2l">Sat</span>
 
                   {/* Calendar Days */}
                   {calendarCells.map((cell, index) => {
@@ -368,13 +368,13 @@ function ResidentAppointments({ onOpenHelp }) {
                     const isSelected = selectedDay === cell.day
                     
                     if (cell.day === null) {
-                      return <span key={index} className="calendar-day-cell other-month"></span>
+                      return <span key={index} className="text-slate-300 cursor-not-allowed"></span>
                     }
 
                     return (
                       <span
                         key={index}
-                        className={`calendar-day-cell ${cell.wrapped ? 'other-month' : ''} ${hasBooking ? 'has-booking' : ''} ${isSelected ? 'selected-day' : ''}`}
+                        className={`aspect-[1.4] flex flex-col items-center justify-center text-[13.5px] font-semibold text-slate-800 cursor-pointer rounded-lg transition-all duration-200 relative border-[1.5px] border-transparent select-none hover:bg-slate-100 ${cell.wrapped ? 'other-month' : ''} ${hasBooking ? 'has-booking' : ''} ${isSelected ? 'selected-day' : ''}`}
                         onClick={() => cell.day && setSelectedDay(cell.day)}
                       >
                         {cell.day < 10 ? '0' + cell.day : cell.day}
@@ -384,13 +384,13 @@ function ResidentAppointments({ onOpenHelp }) {
                 </div>
               </div>
             ) : (
-              <div className="dashboard-announcements-card" style={{ padding: '32px' }}>
-                <h3 className="card-inner-title" style={{ borderBottom: '1.5px solid #cbd5e1', paddingBottom: '12px', marginBottom: '20px' }}>
+              <div className="p-8">
+                <h3 className="border-b-[1.5px] border-slate-300 pb-3 mb-5">
                   Request New Appointment
                 </h3>
 
                 <form onSubmit={handleCreateBooking}>
-                  <div className="form-grid" style={{ gap: '16px' }}>
+                  <div className="gap-4">
                     
                     <div className="form-group">
                       <label htmlFor="purposeSelect">Appointment Purpose</label>

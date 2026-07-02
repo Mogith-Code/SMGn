@@ -2,9 +2,13 @@ import { useNavigate } from 'react-router-dom'
 import { translations, useLanguage } from '../utils/translate'
 import LanguageSelector from '../components/LanguageSelector'
 import logoImage from '../assets/logo.png'
+import heroImage from '../assets/hero-image.png'
 import homeIcon from '../assets/home_24dp_2D3748_FILL0_wght400_GRAD0_opsz24.svg'
 import aboutIcon from '../assets/info_24dp_2D3748_FILL0_wght400_GRAD0_opsz24.svg'
 import servicesIcon from '../assets/accessibility_24dp_2D3748_FILL0_wght400_GRAD0_opsz24.svg'
+import loginIcon from '../assets/login_24dp_F7FAFC_FILL0_wght400_GRAD0_opsz24.svg';
+import registerIcon from '../assets/how_to_reg_24dp_F7FAFC_FILL0_wght400_GRAD0_opsz24.svg'
+import helpIcon from '../assets/contact_support_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg'
 
 function LandingPage({ onOpenHelp }) {
   const navigate = useNavigate()
@@ -75,8 +79,13 @@ function LandingPage({ onOpenHelp }) {
     <div className="landing-container">
       
       {/* 1. Header/Navbar */}
+<<<<<<< HEAD
+      <header className="flex justify-between items-center py-3 px-16 bg-[#EBF8FF] border border-[red] sticky top-0 z-[100] shadow-[0_5px_25px_rgba(0,0,0,0.2)]">
+        <div className="flex flex-col items-start text-left border border-[blue]" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+=======
       <header className="landing-navbar">
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', cursor: 'pointer' }} onClick={() => navigate('/')}>
+>>>>>>> b3bc88899df33fcac0b76c293cc6c090b55bc2eb
           <img 
             src={logoImage} 
             alt="SmartGN Logo" 
@@ -103,61 +112,50 @@ function LandingPage({ onOpenHelp }) {
       </header>
 
       {/* 2. Hero Section */}
-      <section className="landing-hero" id="home">
-        
-        {/* State Banner */}
-        <div className="state-banner">
-          {/* Faux Sri Lankan State Emblem SVG */}
-          <div className="emblem-container">
-            <svg width="60" height="60" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="emblem-svg">
-              <circle cx="32" cy="32" r="28" stroke="#d4af37" strokeWidth="2" fill="none" />
-              <circle cx="32" cy="32" r="24" stroke="#d4af37" strokeWidth="1" fill="none" />
-              {/* Gold decorative lines & circles representing Sri Lankan emblem shape */}
-              <circle cx="32" cy="32" r="14" fill="#d4af37" opacity="0.2" />
-              <path d="M32 6V58" stroke="#d4af37" strokeWidth="1.5" strokeDasharray="3 3"/>
-              <path d="M6 32H58" stroke="#d4af37" strokeWidth="1.5" strokeDasharray="3 3"/>
-              <polygon points="32,18 36,28 46,28 38,34 41,44 32,38 23,44 26,34 18,28 28,28" fill="#d4af37" />
-            </svg>
-          </div>
+      <section className="w-full bg-[#F7FAFC] px-[100px] py-[30px] max-lg:p-[30px] py-[25px] max-md:p-[20px]" id="home">
+        <div className="w-full flex flex-col justify-between items-center gap-5 max-md:gap-[10px] border border-[green]"> 
 
-          <div className="trilingual-titles">
-            <h2 className="title-tamil">கிராம உத்தியோகத்தர்</h2>
-            <h2 className="title-sinhala">ග්‍රාම නිලධාරී</h2>
-            <h1 className="title-english">Grama Niladhari</h1>
-          </div>
+          {/* State Banner */}
+         <div className="w-full h-auto border border-[blue]"> {/*border border-amber-900*/}
+          <img 
+            src={heroImage}
+            alt="Grama Niladhari Service - Helping citizens with administrative services"
+            className="w-full h-[400px] max-lg:h-[300px] max-md:h-[200px]"
+          />
         </div>
 
         {/* Hero Headline & Intro */}
-        <p className="hero-subtext-para">
-          {navTranslations[lang].heroDesc}
-        </p>
+        <div className="w-full px-[50px] max-md:px-0 border border-[blue]"> {/*border border-amber-900*/}
+          <p className="text-center font-light text-[24px] max-lg:text-[20px] max-md:text-[16px] text-[#2D3748]"> 
+            {navTranslations[lang].heroDesc}
+          </p>
+          </div>
 
-        {/* CTAs */}
-        <div className="hero-ctas">
-          <button className="btn-landing-login" onClick={() => navigate('/login')}>
+           {/* BUTTON CONTAINER */}
+          <div className="w-full flex items-center justify-center gap-5 max-md:gap-[10px] border border-[red]">
+            {/* LOGIN BUTTON */}
+            <button className="flex items-center justify-center gap-2.5 max-md:gap-[5px] px-[50px] py-2.5 bg-[#1B365D] shadow-[0_3px_10px_rgba(0,0,0,0.5)] hover:shadow-[0_5px_20px_rgba(0,0,0,0.6)] text-[#F7FAFC] font-medium text-[16px] max-md:text-[12px] max-md:py-[8px] max-md:px-[20px] rounded-[15px] max-md:rounded-[12px] hover:bg-[#005BBD] hover:text-white transition-all duration-300 cursor-pointer"
+             onClick={() => navigate('/login')}>  {/**/}
             {navTranslations[lang].login}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="cta-icon">
-              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-              <polyline points="10 17 15 12 10 7"></polyline>
-              <line x1="15" y1="12" x2="3" y2="12"></line>
-            </svg>
-          </button>
-          
-          <button className="btn-landing-register" onClick={() => navigate('/register')}>
+            {/* Login Icon - Replace with your actual icon */}
+            <img src={loginIcon} alt="Login Icon" className="w-5 h-5" />
+            </button>
+
+            {/* REGISTER BUTTON */}
+            <button className="flex items-center justify-center gap-2.5 px-[50px] py-2.5 bg-[#D69E2E] shadow-[0_3px_10px_rgba(0,0,0,0.5)] hover:shadow-[0_5px_20px_rgba(0,0,0,0.6)] text-[#F7FAFC] font-medium text-[16px] max-md:text-[12px] max-md:py-[8px] max-md:px-[20px] rounded-[15px] max-md:rounded-[12px] hover:bg-[#FFAA00] hover:text-white transition-all duration-300 cursor-pointer" 
+            onClick={() => navigate('/register')}> {/**/}
             {navTranslations[lang].register}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="cta-icon">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="8.5" cy="7" r="4"></circle>
-              <line x1="20" y1="8" x2="20" y2="14"></line>
-              <line x1="23" y1="11" x2="17" y2="11"></line>
-            </svg>
+             {/* Register Icon - Replace with your actual icon */}
+            <img src={registerIcon} alt="Register Icon" className="w-5 h-5" />
           </button>
 
-          <button className="btn-landing-help" aria-label="Help Center" onClick={onOpenHelp}>
-            ?
+          <button className="bg-[#D69E2E] z-[100] ml-[1270px] max-md:ml-[400px] fixed p-[10px] rounded-full cursor-pointer flex items-center justify-center shadow-[0_3px_10px_rgba(0,0,0,0.5)] hover:shadow-[0_5px_20px_rgba(0,0,0,0.6)] transition-all duration-200  hover:bg-[#FFAA00]" aria-label="Help Center" 
+          onClick = {onOpenHelp} >
+          <img src={helpIcon} alt="Help Icon" className="h-[30px] max-md:h-[20px]" />
           </button>
-        </div>
-      </section>
+          </div>
+          </div>
+        </section>
 
       {/* 3. About & Objectives Section */}
       <section className="landing-about-objectives" id="about">
