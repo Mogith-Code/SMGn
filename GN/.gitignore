@@ -1,3 +1,8 @@
+# Environment Variables (API keys - never commit these)
+.env
+.env.local
+.env.*.local
+
 # Logs
 logs
 *.log

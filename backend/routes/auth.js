@@ -72,7 +72,7 @@ router.post('/register', async (req, res) => {
     await pool.query(
       `INSERT INTO resident (r_nic, name, date_of_birth, password, gender, mobile_no, occupation, email, household_number) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [nic, name, dob, hashedPassword, gender, mobile, occupation, email, householdNumber]
+      [nic, name, dob, hashedPassword, gender, mobile, occupation || null, email, householdNumber]
     );
 
     res.status(201).json({ success: true, message: 'Resident registered successfully.' });
@@ -459,7 +459,7 @@ router.put('/admin/residents/:nic', authAdmin, async (req, res) => {
       `UPDATE resident 
        SET name = ?, email = ?, mobile_no = ?, status = ?, occupation = ?, household_number = ? 
        WHERE r_nic = ?`,
-      [name, email, mobile_no, status, occupation, household_number, nic]
+      [name, email, mobile_no, status, occupation || null, household_number, nic]
     );
 
     res.status(200).json({ success: true, message: 'Resident account updated successfully.' });

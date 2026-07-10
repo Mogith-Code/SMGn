@@ -79,13 +79,9 @@ function LandingPage({ onOpenHelp }) {
     <div className="landing-container">
       
       {/* 1. Header/Navbar */}
-<<<<<<< HEAD
-      <header className="flex justify-between items-center py-3 px-16 bg-[#EBF8FF] border border-[red] sticky top-0 z-[100] shadow-[0_5px_25px_rgba(0,0,0,0.2)]">
-        <div className="flex flex-col items-start text-left border border-[blue]" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-=======
       <header className="landing-navbar">
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', cursor: 'pointer' }} onClick={() => navigate('/')}>
->>>>>>> b3bc88899df33fcac0b76c293cc6c090b55bc2eb
+
           <img 
             src={logoImage} 
             alt="SmartGN Logo" 
